@@ -15,7 +15,7 @@ button.g{background:#2f3b49}button.d{background:#6b2b2b}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#141b23;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;border-radius:0;margin:0;padding:10px 2px;font-size:11px;color:var(--m)}nav button.on{color:var(--a)}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;text-align:right;border-bottom:1px solid #2a3542}td:first-child,th:first-child{text-align:left}
-</style></head><body><script>window.onerror=function(m,u,l){document.body.insertAdjacentHTML("afterbegin","<pre style=\"color:#ff6b6b;white-space:pre-wrap;padding:12px\">HATA: "+m+" (satır "+l+")</pre>")}</script><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav>
+</style></head><body><script>window.onerror=function(m,u,l){document.body.insertAdjacentHTML("afterbegin","<pre style=\"color:#ff6b6b;white-space:pre-wrap;padding:12px\">HATA: "+m+" (satır "+l+")</pre>")}</script><div class="w" id="v">Yükleniyor…</div><script>document.getElementById("v").textContent="JS calisiyor. "+navigator.userAgent</script><nav id="n"></nav>
 <script>
 const K='yt1';
 let S=JSON.parse(localStorage.getItem(K)||'null')||{
@@ -38,8 +38,3 @@ async function getRates(d){
  const us=[`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${v}/v1/currencies/usd.json`,`https://${v}.currency-api.pages.dev/v1/currencies/usd.json`];
  for(const u of us){try{const j=(await(await fetch(u)).json()).usd;
   return{usd:j.try,eur:j.try/j.eur,gold:1/j.xau/31.1035*j.try,silver:1/j.xag/31.1035*j.try};}catch(e){}}
- throw new Error('kur');}
-async function getR(){try{const r=await getRates();S.rates={...r,t:nowS()};save();render()}catch(e){alert('Kurlar alınamadı. İnterneti kontrol edin veya elle girin.')}}
-
-// ortalama günlük getiri (sonuçlanmış kayıtlardan)
-function fd(){const c=S.funds.filter(x=>x.p!=null);if(!c.length)return 0;
