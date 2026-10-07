@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Yatırım Takip</title>
+<style>
+:root{--bg:#0f1419;--c:#1a222c;--t:#e8edf2;--m:#8a97a6;--a:#3ddc97;--r:#ff6b6b;--b:#2a7fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px system-ui,sans-serif;padding:env(safe-area-inset-top) 0 80px}
+.w{padding:12px}.card{background:var(--c);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{margin:0 0 10px;font-size:17px}h3{margin:10px 0 4px;font-size:13px;color:var(--m)}
+input,select{width:100%;padding:11px;margin:4px 0 8px;border-radius:10px;border:1px solid #2f3b49;background:#0f1419;color:var(--t);font-size:15px}
+label{font-size:12px;color:var(--m)}
+button{background:var(--b);color:#fff;border:0;border-radius:10px;padding:11px 14px;font-size:15px;margin:4px 4px 0 0}
+button.g{background:#2f3b49}button.d{background:#6b2b2b}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.up{color:var(--a)}.dn{color:var(--r)}.m{color:var(--m);font-size:12px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#141b23;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border-radius:0;margin:0;padding:10px 2px;font-size:11px;color:var(--m)}nav button.on{color:var(--a)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;text-align:right;border-bottom:1px solid #2a3542}td:first-child,th:first-child{text-align:left}
+</style></head><body><div class="w" id="v"></div><nav id="n"></nav>
+<script>
+const K='yt1';
+let S=JSON.parse(localStorage.getItem(K)||'null')||{
+rates:{usd:0,eur:0,gold:0,silver:0,t:''},
+funds:[
+{id:1,n:'Emlak Katılım Fon Havuzu',s:'2025-02-25',e:'2025-05-27',a:15000,p:1026.31,r0:{gold:3509.63,usd:36.54,eur:38.39},r1:{gold:4240.80,usd:38.98,eur:44.49}},
+{id:2,n:'Hesap 699958-1163',s:'2026-10-05',e:'2027-01-05',a:10000,p:null,r0:null,r1:null}],
+assets:[],snaps:[],per:7};
+const save=()=>localStorage.setItem(K,JSON.stringify(S));
+const $=i=>document.getElementById(i);
+const num=v=>parseFloat(String(v).replace(',','.'));
+const f=(n,d=2)=>isFinite(n)?Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}):'-';
+const day=s=>new Date(s);
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const pc=n=>`<span class="${n>=0?'up':'dn'}">${n>=0?'▲':'▼'} %${f(Math.abs(n))}</span>`;
+const nowS=()=>new Date().toLocaleString('tr-TR');
+
+async function getRates(d){
+ const v=d||'latest';
+ const us=[`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${v}/v1/currencies/usd.json`,`https://${v}.currency-api.pages.dev/v1/currencies/usd.json`];
+ for(const u of us){try{const j=(await(await fetch(u)).json()).usd;
+  return{usd:j.try,eur:j.try/j.eur,gold:1/j.xau/31.1035*j.try,silver:1/j.xag/31.1035*j.try};}catch(e){}}
+ throw new Error('kur');}
+async function getR(){try{const r=await getRates();S.rates={...r,t:nowS()};save();render()}catch(e){alert('Kurlar alınamadı. İnterneti kontrol edin veya elle girin.')}}
+
+// ortalama günlük getiri (sonuçlanmış kayıtlardan)
+function fd(){const c=S.funds.filter(x=>x.p!=null);if(!c.length)return 0;
