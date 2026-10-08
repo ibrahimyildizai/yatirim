@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="tr"><head><!--YT-APP--><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Yatırım Takip</title>
+<style>
+:root{--bg:#0f1419;--c:#1a222c;--t:#e8edf2;--m:#8a97a6;--a:#3ddc97;--r:#ff6b6b;--b:#2a7fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px system-ui,sans-serif;padding:0 0 84px}
+.w{padding:8px 12px}.card{background:var(--c);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{margin:0 0 10px;font-size:17px}h3{margin:10px 0 4px;font-size:13px;color:var(--m)}
+input,select,textarea{width:100%;padding:11px;margin:4px 0 8px;border-radius:10px;border:1px solid #2f3b49;background:#0f1419;color:var(--t);font-size:15px}
+label{font-size:12px;color:var(--m)}
+button{background:var(--b);color:#fff;border:0;border-radius:10px;padding:11px 14px;font-size:15px;margin:4px 4px 0 0}
+button.g{background:#2f3b49}button.d{background:#6b2b2b}button:disabled{opacity:.35}
+.row{display:flex;gap:8px}.row>*{flex:1}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.up{color:var(--a)}.dn{color:var(--r)}.m{color:var(--m);font-size:12px}.ok{color:var(--a);font-weight:700;font-size:17px;line-height:1.35}
+#h{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(8px + env(safe-area-inset-top)) 12px 4px}
+.bar{display:flex;gap:8px}.bar button{flex:1;margin:0;padding:9px 6px;font-size:14px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#141b23;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border-radius:0;margin:0;padding:15px 2px;font-size:14px;font-weight:700;color:var(--m);border-top:3px solid transparent}
+nav button.on{color:var(--a);border-top-color:var(--a)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;text-align:right;border-bottom:1px solid #2a3542}td:first-child,th:first-child{text-align:left}
+</style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav>
+<script>
+window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
+const APP_VER='2.1';
+const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d';
+const IND0={v:1,enfY:29.73,enfA:1.84,enfD:'Eylül 2026 (TÜİK)',aclik:37800.92,yoks:123130,aclikD:'Eylül 2026 (Türk-İş)'};
+const DEF=()=>({rates:{usd:0,eur:0,gold:0,silver:0,t:''},
+funds:[
+{id:1,n:'Emlak Katılım Fon Havuzu',s:'2025-02-25',e:'2025-05-27',a:15000,p:1026.31,r0:{gold:3509.63,usd:36.54,eur:38.39},r1:{gold:4240.80,usd:38.98,eur:44.49}},
+{id:2,n:'Hesap 699958-1163',s:'2026-10-05',e:'2027-01-05',a:10000,p:null,r0:null,r1:null}],
+assets:[],snaps:[],per:7,ind:Object.assign({},IND0),zk:{g:81,d:''},lock:false,past:null});
+function norm(s){const o=Object.assign(DEF(),s||{});if(!o.ind||(o.ind.v||0)<IND0.v)o.ind=Object.assign({},IND0);if(!o.zk)o.zk={g:81,d:''};return o}
+let S;try{S=norm(JSON.parse(localStorage.getItem(K)||'null'))}catch(e){S=norm()}
+let cur=JSON.stringify(S),HS;try{HS=JSON.parse(localStorage.getItem(KH)||'null')||{U:[],R:[]}}catch(e){HS={U:[],R:[]}}
+const persist=()=>{localStorage.setItem(K,cur);localStorage.setItem(KH,JSON.stringify(HS))};
+persist();
+// kaydet + geri/ileri geçmişi (son 20 işlem)
+function save(nh){const n=JSON.stringify(S);if(n===cur)return;if(!nh){HS.U.push(cur);if(HS.U.length>20)HS.U.shift();HS.R=[]}cur=n;persist()}
+function undo(){if(!HS.U.length)return;HS.R.push(cur);cur=HS.U.pop();S=norm(JSON.parse(cur));persist();render()}
+function redo(){if(!HS.R.length)return;HS.U.push(cur);cur=HS.R.pop();S=norm(JSON.parse(cur));persist();render()}
+function applyJ(j){if(!confirm('Veriler bu yedekle değiştirilsin mi? (Geri ile dönebilirsin)'))return;HS.U.push(cur);if(HS.U.length>20)HS.U.shift();HS.R=[];S=norm(JSON.parse(j));cur=JSON.stringify(S);persist();render()}
+// taslak (yarım yazılan form alanları) otomatik saklanır
+const DR='fn fs fe fa fp at am ac ca cm cr cg cs cu ce'.split(' ');
+let D={};try{D=JSON.parse(localStorage.getItem(KD)||'{}')}catch(e){}
+document.addEventListener('input',e=>{const i=e.target.id;if(DR.indexOf(i)>=0){D[i]=e.target.value;localStorage.setItem(KD,JSON.stringify(D))}});
+const clrD=a=>{a.forEach(i=>delete D[i]);localStorage.setItem(KD,JSON.stringify(D))};
+const restD=()=>DR.forEach(i=>{const e=document.getElementById(i);if(e&&D[i]!=null)e.value=D[i]});
+// günlük yedek (son 30)
+function backup(){let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}
+ const d=today();if(B.length&&B[B.length-1].d==d)return;B.push({d,t:nowS(),j:cur});while(B.length>30)B.shift();localStorage.setItem(KB,JSON.stringify(B))}
+
+const $=i=>document.getElementById(i);
+const num=v=>parseFloat(String(v).replace(',','.'));
+const f=(n,d=2)=>isFinite(n)?Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}):'-';
+const day=s=>new Date(s);
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const pc=n=>`<span class="${n>=0?'up':'dn'}">${n>=0?'▲':'▼'} %${f(Math.abs(n))}</span>`;
+const nowS=()=>new Date().toLocaleString('tr-TR');
+
+async function getRates(d){
+ const v=d||'latest';
+ const us=[`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${v}/v1/currencies/usd.json`,`https://${v}.currency-api.pages.dev/v1/currencies/usd.json`];
+ for(const u of us){try{const j=(await(await fetch(u)).json()).usd;
+  return{usd:j.try,eur:j.try/j.eur,gold:1/j.xau/31.1035*j.try,silver:1/j.xag/31.1035*j.try};}catch(e){}}
+ throw new Error('kur');}
+async function loadPast(){const d=new Date(Date.now()-91*864e5).toISOString().slice(0,10);if(S.past&&S.past.d==d)return;
+ try{const r=await getRates(d);S.past=Object.assign({d},r);save(true)}catch(e){}}
+let busy=false,err=false;
+async function refresh(auto){if(busy)return;if(auto&&S.lock&&S.rates.usd)return;busy=true;err=false;render();
+ try{const r=await getRates();S.rates=Object.assign({},r,{t:nowS(),ts:Date.now()});save(true);await loadPast()}catch(e){err=true}
+ busy=false;render()}
+
+function fd(){const c=S.funds.filter(x=>x.p!=null);if(!c.length)return 0;
+ return c.reduce((s,x)=>s+x.p/x.a/((day(x.e)-day(x.s))/864e5),0)/c.length}
+
+const V={};
+// ---------- FON ----------
+function fcard(x){
+ const days=Math.round((day(x.e)-day(x.s))/864e5),done=x.p!=null;
+ let h=`<div class="card"><b>${x.n||'Fon'}</b><br><span class="m">${x.s} → ${x.e} (${days} gün)</span><br>Yatırım: ${f(x.a)} TL`;
+ if(!done){h+=`<br>Aktif — vadeye ${Math.max(0,Math.ceil((day(x.e)-Date.now())/864e5))} gün<br><button onclick="fin(${x.id})">Sonuçlandır</button>`}
+ else{const t=x.p/x.a*100;
+  h+=`<br>Kâr: <b class="up">${f(x.p)} TL</b> ${pc(t)}<br><span class="m">Haftalık %${f(t/days*7)} · Aylık %${f(t/days*30.4)} · Yıllık %${f(t/days*365)} (basit)</span>`;
+  if(x.r1)h+=`<br><span class="m">Kâr karşılığı: ${f(x.p/x.r1.gold,3)} gr / ${f(x.p/x.r1.usd)} $ / ${f(x.p/x.r1.eur)} €</span>`;
+  if(x.r0&&x.r1){
+   const c=[['Fon',t],['Altın',(x.r1.gold/x.r0.gold-1)*100],['Dolar',(x.r1.usd/x.r0.usd-1)*100],['Euro',(x.r1.eur/x.r0.eur-1)*100]];
+   const b=Math.max(...c.map(v=>v[1]));
+   h+=`<h3>Aynı dönemde getiri</h3>`+c.map(v=>`<div>${v[1]==b?'🏆 ':'&nbsp;&nbsp;&nbsp;&nbsp;'}${v[0]}: ${pc(v[1])}</div>`).join('')}}
+ if(!x.r0)h+=`<br><button class="g" onclick="kur(${x.id})">Başlangıç kurunu getir</button>`;
+ return h+`<br><button class="d" onclick="delF(${x.id})">Sil</button></div>`}
+V.fon=()=>{const d=fd();
+ return `<div class="card"><h2>Fon özeti</h2>`+(d?`3 aylık ort. getiri: <b>%${f(d*91*100)}</b><br>Aylık: %${f(d*30.4*100)} · Haftalık: %${f(d*7*100)}<br>Yıllık (3 ayda bir yeniden yatırım): %${f((Math.pow(1+d*91,4)-1)*100)}<p class="m">Geçmiş kayıtların ortalamasıdır, garanti değildir.</p>`:'Sonuçlanmış kayıt yok')+`</div>
+<div class="card"><h2>Yeni fon kaydı</h2>
+<input id="fn" placeholder="Ad / not (ör. hesap no)">
+<div class="row"><div><label>Başlangıç</label><input id="fs" type="date" value="${today()}"></div><div><label>Vade</label><input id="fe" type="date"></div></div>
+<label>Tutar (TL)</label><input id="fa" inputmode="decimal">
+<label>Kâr (TL) — vade dolduysa; boşsa aktif sayılır</label><input id="fp" inputmode="decimal">
+<button onclick="addF()">Kaydet</button></div>`+[...S.funds].sort((a,b)=>b.s>a.s?1:-1).map(fcard).join('')};
+async function addF(){
+ const a=num($('fa').value),s=$('fs').value,e=$('fe').value;
+ if(!a||!s||!e)return alert('Tutar, başlangıç ve vade tarihi gerekli');
+ const pv=$('fp').value.trim();
+ const x={id:Date.now(),n:$('fn').value,s,e,a,p:pv===''?null:num(pv),r0:null,r1:null};
+ try{x.r0=await getRates(s<today()?s:undefined)}catch(_){}
+ if(x.p!=null)try{x.r1=await getRates(e<today()?e:undefined)}catch(_){}
+ S.funds.push(x);save();clrD(['fn','fs','fe','fa','fp']);render()}
+async function kur(id){const x=S.funds.find(v=>v.id==id);try{x.r0=await getRates(x.s<today()?x.s:undefined);save();render()}catch(_){alert('Alınamadı')}}
+async function fin(id){const x=S.funds.find(v=>v.id==id),p=num(prompt('Elde edilen kâr (TL)?')||'');
+ if(isNaN(p))return;x.p=p;if(x.e>today())x.e=today();
+ try{x.r1=await getRates(x.e<today()?x.e:undefined)}catch(_){}save();render()}
+function delF(id){if(confirm('Silinsin mi?')){S.funds=S.funds.filter(v=>v.id!=id);save();render()}}
+
+// ---------- HESAPLA ----------
+V.calc=()=>{setTimeout(calc,0);return `<div class="card"><h2>Kazanç hesaplayıcı</h2>
+<label>Yatırılacak tutar (TL)</label><input id="ca" inputmode="decimal" value="10000" oninput="calc()">
+<label>Vade (ay)</label><input id="cm" inputmode="decimal" value="3" oninput="calc()">
+<label>Fon: elle 3 aylık getiri % (boşsa kayıtlardan ortalama)</label><input id="cr" inputmode="decimal" oninput="calc()">
+<h3>Elle 3 aylık değişim % (boşsa son 91 günün gerçek değişimi)</h3>
+<div class="row"><div><label>Altın</label><input id="cg" inputmode="decimal" oninput="calc()"></div><div><label>Gümüş</label><input id="cs" inputmode="decimal" oninput="calc()"></div></div>
+<div class="row"><div><label>Dolar</label><input id="cu" inputmode="decimal" oninput="calc()"></div><div><label>Euro</label><input id="ce" inputmode="decimal" oninput="calc()"></div></div></div>
+<div class="card" id="co"></div><div class="card"><h2>Hızlı tablo (Fon, 3 ay)</h2><div id="ct"></div></div>`};
+function calc(){
+ if(!$('co'))return;
+ const a=num($('ca').value)||0,m=num($('cm').value)||3,Q=S.rates,P=S.past,days=m*30.4;
+ const rf=$('cr').value?num($('cr').value)/100:fd()*91,rows=[];
+ if(rf)rows.push(['Fon','',a*(rf/91)*days]);
+ [['gold','cg','Altın',' gr',3],['silver','cs','Gümüş',' gr',3],['usd','cu','Dolar',' $',2],['eur','ce','Euro',' €',2]].forEach(x=>{
+  const k=x[0];if(!Q[k])return;
+  const r=$(x[1]).value?num($(x[1]).value)/100:(P&&P[k]?Q[k]/P[k]-1:null);if(r==null||isNaN(r))return;
+  rows.push([x[2],f(a/Q[k],x[4])+x[3],a*(Math.pow(1+r,days/91)-1)])});
+ if(!rows.length){$('co').innerHTML='<p class="m">Hesap için Fon kaydı ekleyin ya da Kurlar sekmesinden kurları çekin.</p>';$('ct').innerHTML='';return}
+ const best=Math.max(...rows.map(x=>x[2]));
+ $('co').innerHTML=`<h2>${f(a,0)} TL, ${f(m,0)} ay sonra (tahmini)</h2><table><tr><th>Araç</th><th>Getiri</th><th>Kâr</th><th>Toplam</th></tr>`+
+ rows.map(x=>`<tr><td>${x[2]==best?'🏆 ':''}${x[0]}<br><span class="m">${x[1]}</span></td><td>${pc(x[2]/a*100)}</td><td class="${x[2]>=0?'up':'dn'}">${f(x[2])}</td><td>${f(a+x[2])}</td></tr>`).join('')+
+ `</table><p class="m">Altın, gümüş, dolar ve euro tahmini son 91 günün gerçek değişimine (ya da elle girdiğin %'ye) dayanır. Gelecek garanti değildir. 🏆 en yüksek tahmini kâr.</p>`+
+ (rf?`<p class="m">Fon yıllık (her 3 ayda anapara+kâr yeniden): ${f(a*Math.pow(1+rf,4))} TL</p>`:'');
+ $('ct').innerHTML=rf?`<table><tr><th>Tutar</th><th>Kâr</th><th>Toplam</th></tr>`+[10000,15000,25000,50000,100000].map(v=>`<tr><td>${f(v,0)}</td><td class="up">${f(v*rf)}</td><td>${f(v*(1+rf))}</td></tr>`).join('')+`</table>`:'-'}
+
+// ---------- VARLIK ----------
+const TY={gold:'Altın (gr)',silver:'Gümüş (gr)',usd:'Dolar ($)',eur:'Euro (€)',try:'TL (nakit)'};
+const px=t=>t=='try'?1:(S.rates[t]||0);
+V.ast=()=>{let tot=0,cost=0;
+ const rows=S.assets.map((x,i)=>{const v=x.m*px(x.t);tot+=v;cost+=x.c||0;
+  return `<div class="card"><b>${TY[x.t]}</b>: ${f(x.m,x.t=='gold'||x.t=='silver'?3:2)}<br>Anlık değer: <b>${f(v)} TL</b>`+(x.c?`<br>Maliyet ${f(x.c)} TL · ${pc((v/x.c-1)*100)} (${f(v-x.c)} TL)`:'')+`<br><button class="d" onclick="delA(${i})">Sil</button></div>`}).join('');
+ return `<div class="card"><h2>Toplam varlık</h2><b style="font-size:22px">${f(tot)} TL</b>`+(cost?`<br><span class="m">Maliyetli kalemlerin toplamı: ${f(cost)} TL</span>`:'')+(S.rates.usd?'':'<p class="dn">Kurlar henüz alınamadı.</p>')+`</div>
+<div class="card"><h2>Varlık ekle</h2><select id="at">${Object.entries(TY).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+<label>Miktar</label><input id="am" inputmode="decimal"><label>Toplam alış maliyeti TL (isteğe bağlı)</label><input id="ac" inputmode="decimal">
+<button onclick="addA()">Ekle</button></div>`+rows};
+function addA(){const m=num($('am').value);if(!m)return;S.assets.push({t:$('at').value,m,c:num($('ac').value)||0});save();clrD(['am','ac']);render()}
+function delA(i){if(confirm('Silinsin mi?')){S.assets.splice(i,1);save();render()}}
+
+// ---------- ZEKÂT ----------
+function wealth(){let nak=0,au=0,ag=0,us=0,eu=0,fon=0;
+ S.assets.forEach(x=>{const v=x.m*px(x.t);if(x.t=='try')nak+=v;else if(x.t=='gold')au+=v;else if(x.t=='silver')ag+=v;else if(x.t=='usd')us+=v;else eu+=v});
+ S.funds.forEach(x=>{if(x.p==null)fon+=x.a});
+ const tot=nak+fon+au+ag+us+eu;return{nak,fon,au,ag,us,eu,tot,gr:S.rates.gold?tot/S.rates.gold:0}}
+const HC='en-u-ca-islamic-umalqura-nu-latn';
+function hp(d){const p={};new Intl.DateTimeFormat(HC,{day:'numeric',month:'numeric',year:'numeric'}).formatToParts(d).forEach(x=>p[x.type]=+x.value);return p}
+const hf=d=>new Intl.DateTimeFormat('tr-TR-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(d).replace(/^Hicri\s*/,'');
+const gf=d=>d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric',weekday:'long'});
+function hawl(d0){const a=hp(d0);for(let k=345;k<=365;k++){const d=new Date(d0.getTime()+k*864e5),b=hp(d);if(b.year==a.year+1&&b.month==a.month&&b.day==a.day)return d}return new Date(d0.getTime()+354*864e5)}
+V.zek=()=>{const w=wealth(),g=+S.zk.g||81,ok=S.rates.gold>0&&w.gr>=g;
+ if(ok&&!S.zk.d){S.zk.d=today();save(true)}
+ const r=(n,v)=>`<tr><td>${n}</td><td>${f(v)} TL</td></tr>`;
+ let h=`<div class="card"><h2>Zekât</h2>`;
+ if(!S.rates.gold)h+='<p class="dn">Altın fiyatı yok. Kurlar sekmesinden alın ya da elle girin.</p>';
+ else if(ok)h+=`<div class="ok">Tebrikler! Toplam varlığınız ${f(w.gr)} gr altın değerinde; zekât nisabına (${f(g,0)} gr) ulaştınız.</div>`;
+ else h+=`<p>Toplam varlığınız ${f(w.gr)} gr altın değerinde. Nisaba (${f(g,0)} gr) <b>${f(g-w.gr)} gr</b> (≈ ${f((g-w.gr)*S.rates.gold)} TL) kaldı.</p>`;
+ h+=`<table>${r('Nakit (TL)',w.nak)}${r('Aktif fon (anapara)',w.fon)}${r('Altın',w.au)}${r('Gümüş',w.ag)}${r('Dolar',w.us)}${r('Euro',w.eu)}<tr><td><b>Toplam</b></td><td><b>${f(w.tot)} TL</b></td></tr></table>`;
+ if(ok)h+=`<p>Zekât (kırkta bir, %2,5): <b>${f(w.tot*0.025)} TL</b> <span class="m">(yıl dönümünde)</span></p>`;
+ if(S.zk.d){const d0=new Date(S.zk.d+'T12:00:00'),d1=hawl(d0),left=Math.ceil((d1-Date.now())/864e5);
+  h+=`<h3>Nisaba ulaşılan tarih</h3><div>Miladi: ${gf(d0)}</div><div>Hicri: ${hf(d0)}</div><h3>Yıl dönümü (hawl)</h3><div>Miladi: ${gf(d1)}</div><div>Hicri: ${hf(d1)}</div><div>${left>0?left+' gün kaldı':'<b class="up">Zekât vakti geldi</b>'}</div>`;
+  if(S.rates.gold&&!ok)h+=`<p class="dn m">Şu an nisabın altındasınız. Gösterilen tarih önceki ulaşma tarihidir, gerekirse düzeltin.</p>`}
+ h+=`<h3>Elle düzeltme</h3><label>Nisab (gram altın)</label><input inputmode="decimal" value="${g}" onchange="S.zk.g=num(this.value)||81;save();render()">
+<label>Nisaba ulaşılan tarih</label><input type="date" value="${S.zk.d}" onchange="S.zk.d=this.value;save();render()"><button class="g" onclick="S.zk.d=today();save();render()">Bugünü seç</button>
+<p class="m">Hicri tarih Ümmülkura takvimine göre hesaplanır, Diyanet takvimiyle ±1 gün fark olabilir. Varlıklar Varlık sekmesinden ve aktif fonlardan gelir. Dini hesap için bir âlime danışın.</p></div>`;
+ return h};
+
+// ---------- TAKİP ----------
+const PL={7:'Haftada bir',15:'15 günde bir',30:'Ayda bir',91:'3 ayda bir'};
+function stats(){
+ const sn=S.snaps,l=sn[sn.length-1],d=fd();if(!l)return '';
+ const W=[[7,'Haftalık'],[30,'Aylık'],[365,'Yıllık']],names=['Fon','Altın','Gümüş','Dolar','Euro'];
+ const cols=W.map(([w])=>{
+  const lim=new Date(day(l.d)-w*864e5).toISOString().slice(0,10);
+  const b=[...sn].reverse().find(s=>s.d<=lim);if(!b)return null;
+  const n=(day(l.d)-day(b.d))/864e5;
+  return [d*n*100,(l.gold/b.gold-1)*100,(l.silver/b.silver-1)*100,(l.usd/b.usd-1)*100,(l.eur/b.eur-1)*100]});
+ return `<div class="card"><h2>İstatistik</h2><table><tr><th></th>${W.map(w=>`<th>${w[1]}</th>`).join('')}</tr>`+
+ names.map((nm,i)=>`<tr><td>${nm}</td>`+cols.map(c=>{if(!c)return '<td>-</td>';const m=Math.max(...c);
+  return `<td class="${c[i]==m?'up':''}">${c[i]==m?'🏆':''}${f(c[i])}%</td>`}).join('')+`</tr>`).join('')+
+ `</table><p class="m">🏆 = o dönemin en verimlisi. Sütunlar yeterli kayıt biriktikçe dolar. Fon değeri, ortalama günlük getiriden hesaplanır.</p></div>`}
+V.trk=()=>{const sn=S.snaps,l=sn[sn.length-1];let due='Henüz kayıt yok';
+ if(l){const n=new Date(day(l.d).getTime()+S.per*864e5),left=Math.ceil((n-Date.now())/864e5);
+  due=`Son kayıt: ${l.d}<br>Sonraki güncelleme: ${n.toISOString().slice(0,10)} — `+(left<=0?'<b class="dn">zamanı geldi!</b>':`${left} gün kaldı`)}
+ return `<div class="card"><h2>Güncelleme sıklığı</h2><select onchange="S.per=+this.value;save();render()">${Object.entries(PL).map(([k,v])=>`<option value="${k}" ${k==S.per?'selected':''}>${v}</option>`).join('')}</select><p>${due}</p><button onclick="snap()">Kurları çek ve kayıt al</button></div>`+stats()+
+ (sn.length?`<div class="card"><h2>Son kayıtlar</h2><table><tr><th>Tarih</th><th>Altın</th><th>$</th><th>€</th><th>Gümüş</th></tr>`+[...sn].reverse().slice(0,10).map(s=>`<tr><td>${s.d}</td><td>${f(s.gold)}</td><td>${f(s.usd)}</td><td>${f(s.eur)}</td><td>${f(s.silver)}</td></tr>`).join('')+`</table></div>`:'')};
+async function snap(){try{const r=await getRates();S.rates=Object.assign({},r,{t:nowS(),ts:Date.now()});
+ S.snaps=S.snaps.filter(s=>s.d!=today());S.snaps.push(Object.assign({d:today()},r));S.snaps.sort((a,b)=>a.d>b.d?1:-1);save();render()}
+ catch(e){alert('Kurlar alınamadı')}}
+
+// ---------- KURLAR / GÖSTERGELER / YEDEK ----------
+const mk=(lbl,val,h)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${h};save();render()">`;
+V.krl=()=>{let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}const I=S.ind;
+ return `<div class="card"><h2>Kurlar (TL)</h2><p class="m">Son güncelleme: ${S.rates.t||'-'}<br>Altın/gümüş uluslararası fiyattan hesaplanır, kuyumcu fiyatından biraz farklı olabilir; elle düzeltebilirsin.</p>`+
+ [['gold','Gram altın'],['silver','Gram gümüş'],['usd','Dolar'],['eur','Euro']].map(([k,n])=>mk(n,S.rates[k]?(+S.rates[k]).toFixed(2):'',`S.rates.${k}=num(this.value)`)).join('')+
+ `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto;margin:0" ${S.lock?'checked':''} onchange="S.lock=this.checked;save()"> Elle girdiğim kurları koru (açılışta otomatik çekme)</label>
+<button onclick="refresh(false)">Kurları şimdi çek</button></div>
+<div class="card"><h2>Göstergeler</h2><p class="m">Enflasyon ve açlık/yoksulluk sınırı internetten otomatik çekilemez. Her ay güncel değerleri buraya yazabilir ya da bana "güncelle" diyebilirsin.</p>`+
+ mk('Yıllık enflasyon %',I.enfY,'S.ind.enfY=num(this.value)')+mk('Aylık enflasyon %',I.enfA,'S.ind.enfA=num(this.value)')+
+ `<label>Enflasyon dönemi</label><input value="${I.enfD}" onchange="S.ind.enfD=this.value;save();render()">`+
+ mk('Açlık sınırı (TL)',I.aclik,'S.ind.aclik=num(this.value)')+mk('Yoksulluk sınırı (TL)',I.yoks,'S.ind.yoks=num(this.value)')+
+ `<label>Açlık/yoksulluk dönemi</label><input value="${I.aclikD}" onchange="S.ind.aclikD=this.value;save();render()"></div>
+<div class="card"><h2>Yedekler</h2><p class="m">Uygulama her gün ilk açılışta (ya da açıkken gece 00:00'da) o günün yedeğini alır. En son 30 yedek tutulur, 31. gelince en eskisi silinir. Yedekler telefondaki uygulama verisinde durur; uygulamayı silersen gider, bu yüzden arada "Yedeği kopyala" ile bir yere yapıştırıp sakla.</p>`+
+ (B.length?`<table>`+B.map((b,i)=>`<tr><td>${b.d}<br><span class="m">${b.t}</span></td><td><button class="g" onclick="restB(${i})">Geri yükle</button></td></tr>`).reverse().join('')+`</table>`:'<p class="m">Henüz yedek yok.</p>')+
+ `<button onclick="copyB()">Yedeği kopyala</button><textarea id="ib" rows="3" placeholder="Yedek metnini buraya yapıştır"></textarea><button class="g" onclick="impB()">Yapıştırılanı yükle</button></div>`+updCard()};
+function updCard(){const o=!!localStorage.getItem('app_html'),p=!!localStorage.getItem('app_prev');
+ return `<div class="card"><h2>Uygulama güncelleme</h2><p class="m">Sürüm: ${APP_VER} (${o?'yüklenmiş':'fabrika'}). Sana verdiğim yeni <b>app.html</b> dosyasını telefona indir, aşağıdan seç. GitHub ve APK gerekmez, verilerin korunur. Yeni sürüm açılmazsa kendiliğinden eskisine dönülür.</p>
+<input type="file" id="upf" onchange="pickApp(this)">
+<textarea id="upt" rows="2" placeholder="ya da dosya metnini buraya yapıştır"></textarea><button class="g" onclick="installApp($('upt').value)">Yapıştırılanı yükle</button>
+<button class="g" onclick="revApp()" ${p?'':'disabled'}>Önceki sürüme dön</button><button class="g" onclick="facApp()" ${o?'':'disabled'}>Fabrika sürümüne dön</button></div>`}
+function pickApp(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>installApp(String(r.result));r.readAsText(f)}
+function installApp(t){
+ if(t.length<8000||t.indexOf('YT-A'+'PP')<0||t.indexOf('YT-O'+'K')<0)return alert('Bu dosya uygulama dosyası (app.html) değil ya da eksik.');
+ if(!confirm('Yeni sürüm yüklensin mi? Çalışmazsa otomatik olarak eskisine dönülür.'))return;
+ const a=localStorage.getItem('app_html');
+ if(a)localStorage.setItem('app_prev',a);else localStorage.removeItem('app_prev');
+ localStorage.setItem('app_html',t);localStorage.setItem('app_new','1');localStorage.removeItem('app_try');location.reload()}
+function revApp(){const p=localStorage.getItem('app_prev');if(!p)return;localStorage.setItem('app_html',p);localStorage.removeItem('app_prev');localStorage.setItem('app_new','0');localStorage.removeItem('app_try');location.reload()}
+function facApp(){if(!confirm('Fabrika sürümüne dönülsün mü? (Verilerin silinmez)'))return;['app_html','app_prev','app_try'].forEach(k=>localStorage.removeItem(k));localStorage.setItem('app_new','0');location.reload()}
+function restB(i){let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}if(B[i])applyJ(B[i].j)}
+function copyB(){navigator.clipboard.writeText(cur).then(()=>alert('Kopyalandı'),()=>alert('Kopyalanamadı'))}
+function impB(){try{const o=JSON.parse($('ib').value);if(!o.funds)throw 0;applyJ(JSON.stringify(o))}catch(e){alert('Geçersiz yedek metni')}}
+
+// ---------- ÇATI ----------
+const TABS=[['fon','Fon'],['calc','Hesapla'],['ast','Varlık'],['zek','Zekât'],['trk','Takip'],['krl','Kurlar']];
+let tab='fon';
+function hdr(){return `<div class="bar"><button class="g" onclick="undo()" ${HS.U.length?'':'disabled'}>◀ Geri (${HS.U.length})</button><button class="g" onclick="redo()" ${HS.R.length?'':'disabled'}>İleri (${HS.R.length}) ▶</button></div>
+<div class="m" style="padding:5px 2px 0">Kurlar: ${busy?'güncelleniyor…':(S.rates.t||'alınamadı')}${err&&!busy?' · alınamadı, son değerler gösteriliyor':''}</div>`}
+function indic(){const I=S.ind,mg=localStorage.getItem('app_msg');return (mg?`<div class="card"><span class="dn">${mg}</span><br><button class="g" onclick="localStorage.removeItem('app_msg');render()">Tamam</button></div>`:'')+`<div class="card"><div class="grid">
+<div><div class="m">Yıllık enflasyon</div><b style="font-size:19px">%${f(I.enfY)}</b></div><div><div class="m">Aylık enflasyon</div><b style="font-size:19px">%${f(I.enfA)}</b></div>
+<div><div class="m">Açlık sınırı</div><b>${f(I.aclik)} TL</b></div><div><div class="m">Yoksulluk sınırı</div><b>${f(I.yoks)} TL</b></div></div>
+<div class="m" style="margin-top:8px">${I.enfD} · ${I.aclikD}</div></div>`}
+function render(){$('h').innerHTML=hdr();$('v').innerHTML=indic()+V[tab]();
+ $('n').innerHTML=TABS.map(t=>`<button class="${t[0]==tab?'on':''}" onclick="go('${t[0]}')">${t[1]}</button>`).join('');restD()}
+function go(t){tab=t;render();window.scrollTo(0,0)}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){save(true);persist()}else{backup();if(!S.rates.ts||Date.now()-S.rates.ts>3e5)refresh(true)}});
+window.addEventListener('pagehide',()=>{save(true);persist()});
+setInterval(backup,6e4);
+backup();render();
+try{localStorage.setItem('app_new','0');localStorage.removeItem('app_try')}catch(e){}/*YT-OK*/
+refresh(true);
+</script></body></html>

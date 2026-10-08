@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Yatırım Takip</title>
+<style>body{background:#0f1419;color:#e8edf2;font:15px system-ui,sans-serif;margin:0;padding:16px}</style></head><body>
+<script>
+(function(){
+var L=localStorage;
+function g(k){try{return L.getItem(k)}catch(e){return null}}
+function s(k,v){try{L.setItem(k,v)}catch(e){}}
+function r(k){try{L.removeItem(k)}catch(e){}}
+function run(h){
+ var wd='<script>setTimeout(function(){try{if(localStorage.getItem("app_new")==="1")location.reload()}catch(e){}},5000)<\/script>';
+ h=h.indexOf('<head>')>=0?h.replace('<head>','<head>'+wd):wd+h;
+ document.open();document.write(h);document.close();
+}
+function factory(){fetch('app.html').then(function(x){return x.text()}).then(run).catch(function(){document.body.textContent='Uygulama dosyası okunamadı.'})}
+var a=g('app_html');
+if(a&&g('app_new')==='1'){
+ if(g('app_try')==='1'){
+  var p=g('app_prev');
+  if(p){s('app_html',p)}else{r('app_html')}
+  r('app_prev');s('app_new','0');r('app_try');
+  s('app_msg','Yeni sürüm çalışmadı, önceki sürüme dönüldü.');
+  a=g('app_html');
+ }else{s('app_try','1')}
+}
+function start(){if(a)run(a);else factory()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script></body></html>
