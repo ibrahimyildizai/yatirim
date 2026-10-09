@@ -21,15 +21,15 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;t
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='2.1';
+const APP_VER='2.3';
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d';
 const IND0={v:1,enfY:29.73,enfA:1.84,enfD:'Eylül 2026 (TÜİK)',aclik:37800.92,yoks:123130,aclikD:'Eylül 2026 (Türk-İş)'};
 const DEF=()=>({rates:{usd:0,eur:0,gold:0,silver:0,t:''},
 funds:[
 {id:1,n:'Emlak Katılım Fon Havuzu',s:'2025-02-25',e:'2025-05-27',a:15000,p:1026.31,r0:{gold:3509.63,usd:36.54,eur:38.39},r1:{gold:4240.80,usd:38.98,eur:44.49}},
 {id:2,n:'Hesap 699958-1163',s:'2026-10-05',e:'2027-01-05',a:10000,p:null,r0:null,r1:null}],
-assets:[],snaps:[],per:7,ind:Object.assign({},IND0),zk:{g:81,d:''},lock:false,past:null});
-function norm(s){const o=Object.assign(DEF(),s||{});if(!o.ind||(o.ind.v||0)<IND0.v)o.ind=Object.assign({},IND0);if(!o.zk)o.zk={g:81,d:''};return o}
+assets:[],snaps:[],per:7,ind:Object.assign({},IND0),zk:{g:80.18,d:'',v:2},lock:false,past:null});
+function norm(s){const o=Object.assign(DEF(),s||{});if(!o.ind||(o.ind.v||0)<IND0.v)o.ind=Object.assign({},IND0);if(!o.zk)o.zk={g:80.18,d:'',v:2};if(!o.zk.v){o.zk.v=2;if(o.zk.g==81)o.zk.g=80.18}return o}
 let S;try{S=norm(JSON.parse(localStorage.getItem(K)||'null'))}catch(e){S=norm()}
 let cur=JSON.stringify(S),HS;try{HS=JSON.parse(localStorage.getItem(KH)||'null')||{U:[],R:[]}}catch(e){HS={U:[],R:[]}}
 const persist=()=>{localStorage.setItem(K,cur);localStorage.setItem(KH,JSON.stringify(HS))};
@@ -40,7 +40,7 @@ function undo(){if(!HS.U.length)return;HS.R.push(cur);cur=HS.U.pop();S=norm(JSON
 function redo(){if(!HS.R.length)return;HS.U.push(cur);cur=HS.R.pop();S=norm(JSON.parse(cur));persist();render()}
 function applyJ(j){if(!confirm('Veriler bu yedekle değiştirilsin mi? (Geri ile dönebilirsin)'))return;HS.U.push(cur);if(HS.U.length>20)HS.U.shift();HS.R=[];S=norm(JSON.parse(j));cur=JSON.stringify(S);persist();render()}
 // taslak (yarım yazılan form alanları) otomatik saklanır
-const DR='fn fs fe fa fp at am ac ca cm cr cg cs cu ce'.split(' ');
+const DR='fn fs fe fa fp at am ac ad au ca cm cr cg cs cu ce'.split(' ');
 let D={};try{D=JSON.parse(localStorage.getItem(KD)||'{}')}catch(e){}
 document.addEventListener('input',e=>{const i=e.target.id;if(DR.indexOf(i)>=0){D[i]=e.target.value;localStorage.setItem(KD,JSON.stringify(D))}});
 const clrD=a=>{a.forEach(i=>delete D[i]);localStorage.setItem(KD,JSON.stringify(D))};
@@ -139,14 +139,31 @@ function calc(){
 // ---------- VARLIK ----------
 const TY={gold:'Altın (gr)',silver:'Gümüş (gr)',usd:'Dolar ($)',eur:'Euro (€)',try:'TL (nakit)'};
 const px=t=>t=='try'?1:(S.rates[t]||0);
-V.ast=()=>{let tot=0,cost=0;
- const rows=S.assets.map((x,i)=>{const v=x.m*px(x.t);tot+=v;cost+=x.c||0;
-  return `<div class="card"><b>${TY[x.t]}</b>: ${f(x.m,x.t=='gold'||x.t=='silver'?3:2)}<br>Anlık değer: <b>${f(v)} TL</b>`+(x.c?`<br>Maliyet ${f(x.c)} TL · ${pc((v/x.c-1)*100)} (${f(v-x.c)} TL)`:'')+`<br><button class="d" onclick="delA(${i})">Sil</button></div>`}).join('');
- return `<div class="card"><h2>Toplam varlık</h2><b style="font-size:22px">${f(tot)} TL</b>`+(cost?`<br><span class="m">Maliyetli kalemlerin toplamı: ${f(cost)} TL</span>`:'')+(S.rates.usd?'':'<p class="dn">Kurlar henüz alınamadı.</p>')+`</div>
+V.ast=()=>{let tot=0,cost=0,pl=0,gg=0,gc=0;
+ const rows=S.assets.map((x,i)=>{const v=x.m*px(x.t);tot+=v;
+  const u=x.u||(x.c&&x.m?x.c/x.m:0),cp=px(x.t);
+  let h=`<div class="card"><b>${TY[x.t]}</b>: ${f(x.m,x.t=='gold'||x.t=='silver'?3:2)}<br>Anlık değer: <b>${f(v)} TL</b>`;
+  if(x.t!='try'&&u>0&&cp>0){const c=x.m*u,d=v-c;cost+=c;pl+=d;if(x.t=='gold'){gg+=x.m;gc+=c}
+   h+=`<br><span class="m">Alış${x.d?' ('+x.d+')':''}: ${f(u)} TL → Güncel: ${f(cp)} TL (birim başı)</span><br>${d>=0?'Kâr':'Zarar'}: <b class="${d>=0?'up':'dn'}">${f(Math.abs(d))} TL</b> ${pc((cp/u-1)*100)}`}
+  else if(x.t!='try')h+=`<br><span class="m">Alış fiyatı girilmemiş</span>`;
+  return h+`<br><button class="g" onclick="editA(${i})">Alış fiyatını düzenle</button><button class="d" onclick="delA(${i})">Sil</button></div>`}).join('');
+ const gp=S.rates.gold,gavg=gg?gc/gg:0;
+ return `<div class="card"><h2>Toplam varlık</h2><b style="font-size:22px">${f(tot)} TL</b>`+(cost?`<br>Alışı girilenlerde: <b class="${pl>=0?'up':'dn'}">${pl>=0?'Kâr':'Zarar'} ${f(Math.abs(pl))} TL</b> ${pc(pl/cost*100)}<br><span class="m">Toplam maliyet ${f(cost)} TL</span>`:'')+(gg&&gp?`<h3>Altın özeti</h3><div>${f(gg,3)} gr · ort. alış ${f(gavg)} TL/gr · güncel ${f(gp)} TL/gr</div><div class="${gp>=gavg?'up':'dn'}">Altında ${gp>=gavg?'kâr':'zarar'}: <b>${f(Math.abs(gg*gp-gc))} TL</b> ${pc((gp/gavg-1)*100)}</div>`:'')+(S.rates.usd?'':'<p class="dn">Kurlar henüz alınamadı.</p>')+`</div>
 <div class="card"><h2>Varlık ekle</h2><select id="at">${Object.entries(TY).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
-<label>Miktar</label><input id="am" inputmode="decimal"><label>Toplam alış maliyeti TL (isteğe bağlı)</label><input id="ac" inputmode="decimal">
+<label>Miktar</label><input id="am" inputmode="decimal">
+<label>Alış tarihi (isteğe bağlı)</label><input id="ad" type="date">
+<label>Birim alış fiyatı TL (boşsa tarihten otomatik gelir)</label><input id="au" inputmode="decimal">
+<label>Ya da toplam alış maliyeti TL</label><input id="ac" inputmode="decimal">
+<p class="m">Tarihten gelen fiyat uluslararası fiyattan hesaplanır, kuyumcu fiyatından farklı olabilir; elle yazarsan o kullanılır. Otomatik fiyat yalnızca Mart 2024 sonrası tarihler için çalışır.</p>
 <button onclick="addA()">Ekle</button></div>`+rows};
-function addA(){const m=num($('am').value);if(!m)return;S.assets.push({t:$('at').value,m,c:num($('ac').value)||0});save();clrD(['am','ac']);render()}
+async function addA(){const m=num($('am').value);if(!m)return alert('Miktar gerekli');
+ const t=$('at').value,d=$('ad').value,x={t,m,d:d||'',u:0,c:0};
+ let u=num($('au').value),c=num($('ac').value);
+ if(!(u>0)&&c>0)u=c/m;
+ if(!(u>0)&&d&&t!='try'){try{u=(await getRates(d<today()?d:undefined))[t]}catch(e){return alert('Bu tarihin fiyatı alınamadı. Birim alış fiyatını elle yaz.')}}
+ if(u>0){x.u=u;x.c=m*u}
+ S.assets.push(x);save();clrD(['am','ac','ad','au']);render()}
+function editA(i){const x=S.assets[i],u=num(prompt('Birim alış fiyatı (TL)?',x.u?(+x.u).toFixed(2):'')||'');if(!(u>0))return;x.u=u;x.c=x.m*u;save();render()}
 function delA(i){if(confirm('Silinsin mi?')){S.assets.splice(i,1);save();render()}}
 
 // ---------- ZEKÂT ----------
@@ -159,19 +176,19 @@ function hp(d){const p={};new Intl.DateTimeFormat(HC,{day:'numeric',month:'numer
 const hf=d=>new Intl.DateTimeFormat('tr-TR-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(d).replace(/^Hicri\s*/,'');
 const gf=d=>d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric',weekday:'long'});
 function hawl(d0){const a=hp(d0);for(let k=345;k<=365;k++){const d=new Date(d0.getTime()+k*864e5),b=hp(d);if(b.year==a.year+1&&b.month==a.month&&b.day==a.day)return d}return new Date(d0.getTime()+354*864e5)}
-V.zek=()=>{const w=wealth(),g=+S.zk.g||81,ok=S.rates.gold>0&&w.gr>=g;
+V.zek=()=>{const w=wealth(),g=+S.zk.g||80.18,ok=S.rates.gold>0&&w.gr>=g;
  if(ok&&!S.zk.d){S.zk.d=today();save(true)}
  const r=(n,v)=>`<tr><td>${n}</td><td>${f(v)} TL</td></tr>`;
  let h=`<div class="card"><h2>Zekât</h2>`;
  if(!S.rates.gold)h+='<p class="dn">Altın fiyatı yok. Kurlar sekmesinden alın ya da elle girin.</p>';
- else if(ok)h+=`<div class="ok">Tebrikler! Toplam varlığınız ${f(w.gr)} gr altın değerinde; zekât nisabına (${f(g,0)} gr) ulaştınız.</div>`;
- else h+=`<p>Toplam varlığınız ${f(w.gr)} gr altın değerinde. Nisaba (${f(g,0)} gr) <b>${f(g-w.gr)} gr</b> (≈ ${f((g-w.gr)*S.rates.gold)} TL) kaldı.</p>`;
+ else if(ok)h+=`<div class="ok">Tebrikler! Toplam varlığınız ${f(w.gr)} gr altın değerinde; zekât nisabına (${f(g)} gr) ulaştınız.</div>`;
+ else h+=`<p>Toplam varlığınız ${f(w.gr)} gr altın değerinde. Nisaba (${f(g)} gr) <b>${f(g-w.gr)} gr</b> (≈ ${f((g-w.gr)*S.rates.gold)} TL) kaldı.</p>`;
  h+=`<table>${r('Nakit (TL)',w.nak)}${r('Aktif fon (anapara)',w.fon)}${r('Altın',w.au)}${r('Gümüş',w.ag)}${r('Dolar',w.us)}${r('Euro',w.eu)}<tr><td><b>Toplam</b></td><td><b>${f(w.tot)} TL</b></td></tr></table>`;
  if(ok)h+=`<p>Zekât (kırkta bir, %2,5): <b>${f(w.tot*0.025)} TL</b> <span class="m">(yıl dönümünde)</span></p>`;
  if(S.zk.d){const d0=new Date(S.zk.d+'T12:00:00'),d1=hawl(d0),left=Math.ceil((d1-Date.now())/864e5);
   h+=`<h3>Nisaba ulaşılan tarih</h3><div>Miladi: ${gf(d0)}</div><div>Hicri: ${hf(d0)}</div><h3>Yıl dönümü (hawl)</h3><div>Miladi: ${gf(d1)}</div><div>Hicri: ${hf(d1)}</div><div>${left>0?left+' gün kaldı':'<b class="up">Zekât vakti geldi</b>'}</div>`;
   if(S.rates.gold&&!ok)h+=`<p class="dn m">Şu an nisabın altındasınız. Gösterilen tarih önceki ulaşma tarihidir, gerekirse düzeltin.</p>`}
- h+=`<h3>Elle düzeltme</h3><label>Nisab (gram altın)</label><input inputmode="decimal" value="${g}" onchange="S.zk.g=num(this.value)||81;save();render()">
+ h+=`<h3>Elle düzeltme</h3><label>Nisab (gram altın)</label><input inputmode="decimal" value="${g}" onchange="S.zk.g=num(this.value)||80.18;save();render()">
 <label>Nisaba ulaşılan tarih</label><input type="date" value="${S.zk.d}" onchange="S.zk.d=this.value;save();render()"><button class="g" onclick="S.zk.d=today();save();render()">Bugünü seç</button>
 <p class="m">Hicri tarih Ümmülkura takvimine göre hesaplanır, Diyanet takvimiyle ±1 gün fark olabilir. Varlıklar Varlık sekmesinden ve aktif fonlardan gelir. Dini hesap için bir âlime danışın.</p></div>`;
  return h};
