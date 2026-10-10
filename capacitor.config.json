@@ -1,5 +1,10 @@
 {
   "appId": "com.benim.yatirim",
   "appName": "Yatırım Takip",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
 }
