@@ -1,5 +1,9 @@
 # Yatırım Takip – Güncelleme Günlüğü
 
+## 3.15 (2026-10-31)
+- Geliştirici kartları (Uygulama güncelleme, GitHub bağlantısı, Geliştirmeyi bitir) Ayarlar'ın en üstüne taşındı.
+- Bildirimler: hedef tarihi yaklaşınca da telefon bildirimi gelir (vade ile aynı gün ayarları; tamamlanan hedefler hariç).
+
 Bu liste uygulamada Ayarlar → Güncelleme günlüğü bölümüyle aynıdır. Her güncellemede ikisi birlikte değişir.
 
 ## 3.12 – 2026-10-24
