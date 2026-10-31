@@ -1,5 +1,10 @@
 # Yatırım Takip – Güncelleme Günlüğü
 
+## 3.16 (2026-10-31)
+- Kur uyarısı (isteğe bağlı): Ayarlar → Bildirimler'de kur ve eşik seçilir; uygulama açılınca ve kurlar güncellenince kontrol edilir, bildirim izni açınca istenir. Uygulama kapalıyken kur çekilmez.
+- Yeni sürüm uyarısı: uygulama açılınca sürüm bilgisine bakar, yeni sürüm varsa üstte haber verir ve indirme sayfasını açar. Uygulama kendini değiştirmez.
+- Hakkında: Güncellemeyi denetle düğmesi.
+
 ## 3.15 (2026-10-31)
 - Geliştirici kartları (Uygulama güncelleme, GitHub bağlantısı, Geliştirmeyi bitir) Ayarlar'ın en üstüne taşındı.
 - Bildirimler: hedef tarihi yaklaşınca da telefon bildirimi gelir (vade ile aynı gün ayarları; tamamlanan hedefler hariç).
