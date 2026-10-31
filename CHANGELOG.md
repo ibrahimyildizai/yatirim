@@ -1,5 +1,11 @@
 # Yatırım Takip – Güncelleme Günlüğü
 
+## 3.17 (2026-10-31)
+- Fon sekmesi: "Yeni fon kaydı" kartına aç/kapa oku eklendi.
+- Fon kayıtları iki gruba ayrıldı: Borsa fonları (kodlu, fiyatı çekilen) ve Proje tercihli fonlar (elle girilen). Her grubun kendi başlığı, sayısı ve toplamı var.
+- Vadesi geçmiş ve henüz sonuçlandırılmamış fonlar toplam varlığa, fon özetine ve borsa özetine katılmaz; kartında "Vadesi doldu" yazar.
+- Borsa fon / sertifika özeti yalnızca kodlu (DMLKT) kayıtları sayar; "Fon özeti" artık "Proje fon özeti": yalnızca elle girilen vadeli kayıtların getirisini hesaplar.
+
 ## 3.16 (2026-10-31)
 - Kur uyarısı (isteğe bağlı): Ayarlar → Bildirimler'de kur ve eşik seçilir; uygulama açılınca ve kurlar güncellenince kontrol edilir, bildirim izni açınca istenir. Uygulama kapalıyken kur çekilmez.
 - Yeni sürüm uyarısı: uygulama açılınca sürüm bilgisine bakar, yeni sürüm varsa üstte haber verir ve indirme sayfasını açar. Uygulama kendini değiştirmez.
