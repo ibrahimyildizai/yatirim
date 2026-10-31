@@ -1,7 +1,17 @@
 name: APK
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: "APK'yi GitHub Release olarak yayinla"
+        type: boolean
+        default: false
   push:
+permissions:
+  contents: write
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,9 +56,18 @@ jobs:
           [ -n "$VER" ] || (echo "APP_VER bulunamadi" && exit 1)
           NAME="Yatirim Takip_v${VER}.apk"
           cp android/app/build/outputs/apk/debug/app-debug.apk "android/app/build/outputs/apk/debug/$NAME"
+          echo "VER=$VER" >> "$GITHUB_ENV"
           echo "APK_NAME=$NAME" >> "$GITHUB_ENV"
           echo "ART_NAME=yatirim-apk-v${VER}" >> "$GITHUB_ENV"
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ART_NAME }}
           path: android/app/build/outputs/apk/debug/${{ env.APK_NAME }}
+      - name: Surum yayini (yalnizca elle + release isaretliyse)
+        if: github.event_name == 'workflow_dispatch' && inputs.release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          F="android/app/build/outputs/apk/debug/${APK_NAME}"
+          gh release view "v${VER}" >/dev/null 2>&1 || gh release create "v${VER}" --title "v${VER}" --notes "Yatirim Takip v${VER}"
+          gh release upload "v${VER}" "$F" --clobber
