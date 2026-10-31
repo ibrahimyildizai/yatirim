@@ -23,10 +23,14 @@ details{margin:4px 0}details details{margin-left:8px}summary{cursor:pointer;padd
 .pb{height:12px;background:var(--in);border-radius:8px;overflow:hidden}.pb>i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--a))}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;text-align:right;border-bottom:1px solid var(--tb)}td:first-child,th:first-child{text-align:left}
 .fh{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}.ar{flex:none;width:32px;height:32px;border-radius:10px;background:var(--b2);color:var(--t);display:flex;align-items:center;justify-content:center;font-size:15px}[hidden]{display:none!important}
+.bw{display:block;width:100%;margin:8px 0 0;padding:14px}.bw.w2{background:#f2edf2;color:#111}
+.bdg{font-size:12px;font-weight:700;padding:5px 10px;border-radius:14px;background:rgba(245,183,58,.18);color:#e0a020;white-space:nowrap}.bdg.ok2{background:rgba(61,220,151,.18);color:var(--a)}
+.gst{margin-top:10px;padding:10px 12px;border-radius:10px;border-left:4px solid var(--a);background:rgba(61,220,151,.1);color:var(--a);font-size:13px;line-height:1.4}.gst.er{border-left-color:var(--r);background:rgba(255,107,107,.1);color:var(--r)}
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav><div id="pt" style="display:none;position:fixed;top:calc(64px + env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:9;color:#3ddc97;font-weight:700;pointer-events:none"></div>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='3.12';
+const APP_VER='3.15';
+var DEV_ALLOWED=true;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
 function upSave(){try{UP.tab=tab;UP.lg=LASTG;UP.open=UI.open;UP.m=UI.m;UP.st=UI.st;localStorage.setItem(KU,JSON.stringify(UP))}catch(e){}}
@@ -189,7 +193,7 @@ function fcard(x){
  let h=`<div class="card"><b>${x.n||'Fon'}</b>${x.k?` <span class="m">(${esc(x.k)})</span>`:''}<br><span class="m">${x.o?`Alış: ${x.s} (${wk(x.s)}) · vadesiz`:`${x.s} (${wk(x.s)}) → ${x.e} (${wk(x.e)}) · ${days} gün`}</span><br>${x.q>0?'Maliyet':'Yatırım'}: ${f(x.a)} TL`;
  if(!done){
   if(x.q>0){const pr=qp(x),Qd=(S.q||{})[qn(x.k)],val=pr*x.q,pl=val-x.a;h+=`<br>Adet: <b>${f(x.q,x.q%1?4:0)}</b> · Birim maliyet: <b>${f(x.c,4)} TL</b>`;
-   if(pr>0)h+=`<br>Anlık fiyat: <b>${f(pr,4)} TL</b> <span class="m">(${Qd?esc(Qd.src)+' · '+Qd.t:'elle girilen'})</span><br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(pl/x.a*100)}`;
+   if(pr>0)h+=`<br>Anlık fiyat: <b>${f(pr,4)} TL</b> <span class="m">(${Qd?esc(Qd.src):'elle girilen'})</span>${Qd?`<br><span class="m">Son güncelleme: ${esc(Qd.t)}</span>`:''}<br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(pl/x.a*100)}`;
    else h+=`<br><span class="m">Anlık fiyat alınamadı${QE[qn(x.k)]?' ('+esc(String(QE[qn(x.k)]).slice(0,160))+')':''}. “Fiyatı güncelle”ye dokun ya da Düzelt → elle fiyat gir.</span>`}
   h+=(x.o?'<br>Aktif — vadesiz':`<br>Aktif — vadeye ${Math.max(0,Math.ceil((day(x.e)-Date.now())/864e5))} gün`)+`<br><button onclick="fin(${x.id})">${x.q>0?'Sat / kapat':'Sonuçlandır'}</button>`+(x.q>0?'<button class="g" onclick="qNow()">Fiyatı güncelle</button>':'')}
  else{const t=x.p/x.a*100;
@@ -247,13 +251,14 @@ async function qGenel(k){const d=await jf('https://api.genelpara.com/embed/borsa
 async function qGoogle(k){const t=await hget('https://www.google.com/finance/quote/'+k+':IST?hl=en',12000),m=t.match(/data-last-price="([\d.,]+)"/),v=m?pn(m[1].replace(/,/g,'')):0;if(v>0)return v;throw new Error('fiyat bulunamadı')}
 const QSRC=[['Yahoo Finance',qYahoo],['Genelpara',qGenel],['Google Finance',qGoogle]];
 async function refQ(){const ks=[...new Set(S.funds.filter(x=>x.k&&x.p==null).map(x=>qn(x.k)))].filter(Boolean);if(!ks.length)return 0;S.q=S.q||{};let ok=0;
- await Promise.all(ks.map(async k=>{const es=[];for(const s of QSRC){try{const v=await Promise.race([s[1](k),new Promise((_,j)=>setTimeout(()=>j(new Error('zaman aşımı')),20000))]);if(v>0){S.q[k]={p:v,t:nowS(),src:s[0]};ok++;delete QE[k];return}}catch(e){es.push(s[0]+': '+(e&&e.message||e))}}QE[k]=es.join(' · ')}));
+ await Promise.all(ks.map(async k=>{const es=[];for(const s of QSRC){try{const v=await Promise.race([s[1](k),new Promise((_,j)=>setTimeout(()=>j(new Error('zaman aşımı')),20000))]);if(v>0){S.q[k]={p:v,t:nowS(),ts:Date.now(),src:s[0]};ok++;delete QE[k];return}}catch(e){es.push(s[0]+': '+(e&&e.message||e))}}QE[k]=es.join(' · ')}));
  if(ok)save(true);return ok}
 async function qNow(silent){if(!silent)toast('Fiyat alınıyor…');try{const n=await refQ();render();if(!silent)toast(n?'Fiyat güncellendi ✓':'Fiyat alınamadı')}catch(e){if(!silent)toast('Fiyat alınamadı')}}
 function fsum(){const A=S.funds.filter(x=>x.p==null),P=A.filter(x=>x.q>0&&qp(x)>0),pl=P.reduce((s,x)=>s+qp(x)*x.q-x.a,0);return A.length+' aktif'+(P.length?` · ${pl>=0?'kâr':'zarar'} ${f(Math.abs(pl))} TL`:'')}
+function qStamp(P){const Z=P.map(x=>(S.q||{})[qn(x.k)]).filter(q=>q&&q.ts);if(!Z.length)return '';const o=Z.reduce((a,b)=>b.ts<a.ts?b:a);return `<p class="m">Fiyatlar en son: ${esc(o.t)}</p>`}
 function posCard(){const P=S.funds.filter(x=>x.p==null&&x.q>0);if(!P.length)return '';let cost=0,val=0,miss=0;
  P.forEach(x=>{cost+=x.a;const pr=qp(x);if(pr>0)val+=pr*x.q;else{val+=x.a;miss++}});const pl=val-cost;
- return `<div class="card"><h2>Borsa fon / sertifika özeti</h2>Toplam maliyet: <b>${f(cost)} TL</b><br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(cost?pl/cost*100:0)}`+(miss?`<p class="m">${miss} kayıtta anlık fiyat alınamadı; o kayıtlar maliyetle sayıldı.</p>`:'')+`<button class="g" onclick="qNow()">Fiyatları güncelle</button></div>`}
+ return `<div class="card"><h2>Borsa fon / sertifika özeti</h2>Toplam maliyet: <b>${f(cost)} TL</b><br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(cost?pl/cost*100:0)}`+(miss?`<p class="m">${miss} kayıtta anlık fiyat alınamadı; o kayıtlar maliyetle sayıldı.</p>`:'')+qStamp(P)+`<button class="g" onclick="qNow()">Fiyatları güncelle</button></div>`}
 
 // ---------- EVDE BAKIM UYGUNLUK (Hesapla) ----------
 var EVN='4',EVG='';
@@ -263,14 +268,14 @@ function evCard(){const A=S.asg,lim=A.net*2/3;return `<div class="card"><h2>Evde
 <div class="card"><h2>Evde bakım yardımı nedir?</h2><div class="m" style="font-size:13px;color:var(--t)">• Bakıma muhtaç engelli bireyi evinde bakan yakınına her ay ödenir; tutar: <b>${f(A.bakim,0)} TL</b> (${A.bakimD}).<br>• Tutar, 10.000 gösterge rakamı ile memur aylık katsayısının çarpımıdır; Ocak ve Temmuz'da güncellenir.<br>• Bakım ihtiyacı sağlık kurulu raporu ve Bakanlık incelemesiyle belgelenmelidir; bakım hanede fiilen verilmelidir.<br>• Başvuru: Aile ve Sosyal Hizmetler il/ilçe müdürlükleri. Bilgi için ALO 183.<br>• Kesin karar Bakanlığın incelemesine bağlıdır; burası genel bilgilendirmedir.</div></div>`}
 
 // ---------- HESAPLA ----------
-V.calc=()=>{setTimeout(()=>{calc();asgCalc()},0);return `<div class="card"><h2>Kazanç hesaplayıcı</h2>
+V.calc=()=>{setTimeout(calc,0);return `<div class="card"><h2>Kazanç hesaplayıcı</h2>
 <label>Yatırılacak tutar (TL)</label><input id="ca" inputmode="decimal" value="10000" oninput="calc()">
 <label>Vade (ay)</label><input id="cm" inputmode="decimal" value="3" oninput="calc()">
 <label>Fon: elle 3 aylık getiri % (boşsa kayıtlardan ortalama)</label><input id="cr" inputmode="decimal" oninput="calc()">
 <h3>Elle 3 aylık değişim % (boşsa son 91 günün gerçek değişimi)</h3>
 <div class="row"><div><label>Altın</label><input id="cg" inputmode="decimal" oninput="calc()"></div><div><label>Gümüş</label><input id="cs" inputmode="decimal" oninput="calc()"></div></div>
 <div class="row"><div><label>Dolar</label><input id="cu" inputmode="decimal" oninput="calc()"></div><div><label>Euro</label><input id="ce" inputmode="decimal" oninput="calc()"></div></div></div>
-<div class="card" id="co"></div><div class="card"><h2>Hızlı tablo (Fon, 3 ay)</h2><div id="ct"></div></div>`+evCard()};
+<div class="card" id="co"></div><div class="card"><h2>Hızlı tablo (Fon, 3 ay)</h2><div id="ct"></div></div>`};
 function calc(){
  if(!$('co'))return;
  const a=num($('ca').value)||0,m=num($('cm').value)||3,Q=S.rates,P=S.past,days=m*30.4;
@@ -570,6 +575,7 @@ V.asg=()=>{setTimeout(asgCalc,0);const A=S.asg,Q=S.rates,I=S.ind,lim=A.net*2/3;
 <table style="margin-top:8px"><tr><td>SGK işçi payı (%14)</td><td>${f(A.sgk)}</td></tr><tr><td>İşsizlik sigortası (%1)</td><td>${f(A.issiz)}</td></tr><tr><td>Gelir ve damga vergisi</td><td>İstisna</td></tr><tr><td>İşverene maliyet (yaklaşık)</td><td>${f(A.isvMin)} – ${f(A.isvMax)}</td></tr></table>
 <div class="m" style="margin-top:6px">Dönem: ${A.donem}. Önceki yıl net ${f(A.prev)} TL, artış %${f((A.net/A.prev-1)*100,0)}. Son kontrol: ${A.chk}.</div></div>
 <div class="card"><h2>Karşılığı</h2><div>${Q.usd?f(A.net/Q.usd):'-'} $ · ${Q.eur?f(A.net/Q.eur):'-'} € · ${Q.gold?f(A.net/Q.gold,2):'-'} gr altın</div><div class="m">Güncel alış fiyatlarıyla. Açlık sınırının %${f(A.net/I.aclik*100,0)}'i, yoksulluk sınırının %${f(A.net/I.yoks*100,0)}'i.</div></div>
+${evCard()}
 <details><summary>Rakamları düzenle / kaynak</summary><div class="card"><p class="m">Resmî kurumların açık veri servisi olmadığı için bu rakamlar uygulamaya elle girilir. Yeni asgari ücret ya da yeni yardım tutarı açıklanınca buradan düzelt ya da bana "güncelle" de. Değerler Çalışma ve Sosyal Güvenlik Bakanlığı ile Aile ve Sosyal Hizmetler Bakanlığı'nın 2026 açıklamalarından alındı; başvurmadan önce Bakanlıkla (ALO 183) teyit et.</p>`+
  mk2('Net asgari ücret (TL)',A.net,'S.asg.net=num(this.value)')+mk2('Brüt asgari ücret (TL)',A.brut,'S.asg.brut=num(this.value)')+mk2('Evde bakım yardımı aylık (TL)',A.bakim,'S.asg.bakim=num(this.value)')+
  `<label>Evde bakım dönemi</label><input value="${esc(A.bakimD)}" onchange="S.asg.bakimD=this.value;save();render()"><label>Son kontrol tarihi</label><input value="${esc(A.chk)}" onchange="S.asg.chk=this.value;save();render()"></div></details>`};
@@ -584,6 +590,9 @@ function asgCalc(){const o=$('ab');if(!o)return;const A=S.asg,lim=A.net*2/3;EVN=
 // ---------- KURLAR / GÖSTERGELER / YEDEK ----------
 const mk=(lbl,val,hd)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${hd};save();render()">`;
 const CHANGELOG=[
+{v:'3.15',d:'2026-10-31',t:['Geliştirici kartları (Uygulama güncelleme, GitHub bağlantısı, Geliştirmeyi bitir) Ayarlar\'ın en üstüne taşındı.','Bildirimler: hedef tarihi yaklaşınca da telefon bildirimi gelir (vade ile aynı gün ayarları; tamamlanan hedefler hariç).']},
+{v:'3.14',d:'2026-10-31',t:['Geliştirici köprüsü: Ayarlar\'da Uygulama güncelleme, GitHub bağlantısı ve Geliştirmeyi bitir kartları. Denenen sürüm uygulamadan GitHub\'a gönderilir, CHANGELOG.md de yazılır.','Güvenli sürüm (DEV_ALLOWED=false) bu kartları gizler ve deneme dosyalarını siler.','Adresten güncelleme kaldırıldı.']},
+{v:'3.13',d:'2026-10-31',t:['Borsa fiyatı: her kayıtta ve özet kartında fiyatın son güncelleme zamanı gösterilir.','Evde bakım yardımı kontrolü Hesapla sayfasından Asgari ücret sayfasına taşındı.','Güncelleme günlüğüne GitHub bağlantısı eklendi.','APK adı sürümü gösterir (Yatirim Takip_v3.13.apk).']},
 {v:'3.12',d:'2026-10-24',t:['Kilitle ve Gizle artık tek tek sayfalar için de seçilebilir: Fon, Varlık, Hedefler, Hesapla, Zekât, Genel, Asgari ücret, Özet, Ne zaman?, Maaş, Güncelle. Bölümün tamamını da seçmeye devam edebilirsin.']},
 {v:'3.11',d:'2026-10-24',t:['Şifre ve kilit: her bölüm ve Ayarlar kartı için Kilitle yanında Gizle seçeneği. Gizli bölüm şifre girilene kadar hiç görünmez, uygulama kapanınca tekrar gizlenir.']},
 {v:'3.10',d:'2026-10-24',t:['Kilit artık Ayarlar\'daki her bölüm için de seçilebilir (Görünüm, Kurlar, Bildirimler, Yedekleme, Veri, Hakkında…).','Şifre ve kilit kartı Hakkında\'nın üstüne taşındı.','Kilit simgesi küçüldü, arka plansız ve tema rengine uyumlu.']},
@@ -597,19 +606,19 @@ V.krl=()=>lockCards(krl0());
 const krl0=()=>{setTimeout(ntRefresh,0);if(anyLk()&&!UNL)setTimeout(()=>{const e=$('pwi');e&&e.focus()},80);if(FLIST===undefined&&FL()&&YF()){FLIST='yük';fLoad()}let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}const I=S.ind;
  let used=0;try{for(const k in localStorage)if(Object.prototype.hasOwnProperty.call(localStorage,k))used+=(k.length+String(localStorage[k]).length)*2}catch(e){}
  const o=!!localStorage.getItem('app_html'),p=!!localStorage.getItem('app_prev'),wv=(navigator.userAgent.match(/Chrome\/[\d.]+/)||['?'])[0];
- return `<!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0)}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['dark','Koyu'],['light','Açık'],['auto','Otomatik']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
+ return `${devCards()}<!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0)}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['dark','Koyu'],['light','Açık'],['auto','Otomatik']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
 <label>Vurgu rengi</label><div class="chips">${Object.entries(ACC).map(a=>`<button style="background:${a[1][1]};color:#fff;${S.th.c==a[0]?'outline:3px solid var(--t)':''}" onclick="setAcc('${a[0]}')">${S.th.c==a[0]?'✓ ':''}${a[1][0]}</button>`).join('')}</div></div></div>
 <!--c:s_kur--><div class="card">${foldH('s_kur','<h2 style="margin:0">Kurlar (TL)</h2>',0,`Son: ${S.rates.t||'-'} · ${srcText(S.rates.src)}`)}<div ${isO('s_kur',0)?'':'hidden'} style="margin-top:10px"><p class="m">Son güncelleme: ${S.rates.t||'-'}<br>Kaynak: <b>${srcText(S.rates.src)}</b><br>Gram altın: alış ${f(S.rates.gold)} · satış ${f(S.rates.goldS||S.rates.gold)} TL<br>Aşağıdaki kutular <b>alış</b> fiyatıdır (kuyumcunun senden aldığı); portföy değeri bununla hesaplanır. Elle düzeltebilirsin.</p>`+
  [['gold','Gram altın (alış)'],['silver','Gram gümüş (alış)'],['usd','Dolar (alış)'],['eur','Euro (alış)']].map(([k,n])=>mk(n,S.rates[k]?(+S.rates[k]).toFixed(2):'',`S.rates.${k}=num(this.value)`)).join('')+
  `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto;margin:0" ${S.lock?'checked':''} onchange="S.lock=this.checked;save()"> Elle girdiğim kurları koru (açılışta otomatik çekme)</label>
 <button onclick="refresh(false)">Kurları şimdi çek</button></div></div>
 <!--c:s_bil--><div class="card">${foldH('s_bil','<h2 style="margin:0">Bildirimler</h2>',0,`${S.nt.on?'Açık':'Kapalı'} · saat ${S.nt.t}`)}<div ${isO('s_bil',0)?'':'hidden'} style="margin-top:10px">
-<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto;margin:0" ${S.nt.on?'checked':''} onchange="S.nt.on=this.checked;save();render()"> Fon vadesi bildirimi</label>
+<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto;margin:0" ${S.nt.on?'checked':''} onchange="S.nt.on=this.checked;save();render()"> Fon vadesi ve hedef tarihi bildirimi</label>
 <h3>Ne zaman haber verilsin?</h3>`+OFF.map(o=>`<label style="display:flex;gap:8px;align-items:center;font-size:14px;color:var(--t)"><input type="checkbox" style="width:auto;margin:0" ${S.nt.off.indexOf(o[0])>=0?'checked':''} onchange="ntOff(${o[0]},this.checked)"> ${o[1]}</label>`).join('')+`
 <label>Bildirim saati</label><input type="time" value="${S.nt.t}" onchange="S.nt.t=this.value||'09:00';save();render()">
 <p class="m" id="ntst">Kontrol ediliyor…</p><button onclick="ntAsk()">Bildirim izni iste</button><button class="g" onclick="ntTest()">Test bildirimi</button>
 <p class="m">Sadece sonuçlanmamış (aktif) fonlar için gönderilir. Telefon enerji tasarrufu bildirimi birkaç dakika geciktirebilir. Uygulama açıkken vadesi yaklaşan fonlar ana sayfanın üstünde de görünür.</p></div></div>
-<!--c:s_gun--><div class="card">${foldH('s_gun','<h2 style="margin:0">Güncelleme günlüğü</h2>',0,'Sürüm '+APP_VER)}<div ${isO('s_gun',0)?'':'hidden'} style="margin-top:10px">${CHANGELOG.map(c=>`<div style="margin-bottom:10px"><b>${c.v}</b> <span class="m">${c.d}</span><ul style="margin:4px 0 0 18px;padding:0">${c.t.map(x=>`<li class="m">${esc(x)}</li>`).join('')}</ul></div>`).join('')}<p class="m">Aynı liste GitHub'da CHANGELOG.md dosyasında da durur.</p></div></div>
+<!--c:s_gun--><div class="card">${foldH('s_gun','<h2 style="margin:0">Güncelleme günlüğü</h2>',0,'Sürüm '+APP_VER+(DEV_ALLOWED?' · geliştirici':' · güvenli'))}<div ${isO('s_gun',0)?'':'hidden'} style="margin-top:10px">${CHANGELOG.map(c=>`<div style="margin-bottom:10px"><b>${c.v}</b> <span class="m">${c.d}</span><ul style="margin:4px 0 0 18px;padding:0">${c.t.map(x=>`<li class="m">${esc(x)}</li>`).join('')}</ul></div>`).join('')}<p class="m">Aynı liste GitHub'da CHANGELOG.md dosyasında da durur: <a href="https://github.com/ibrahimyildizai/yatirim/blob/main/CHANGELOG.md" target="_blank" rel="noopener">GitHub'da aç</a></p></div></div>
 <!--c:s_kay--><div class="card">${foldH('s_kay','<h2 style="margin:0">Kurlar nereden geliyor?</h2>',0)}<div ${isO('s_kay',0)?'':'hidden'} style="margin-top:10px"><p class="m">Fiziki altın alım-satımında baz alınan Harem Altın'ın resmî, herkese açık bir veri hizmeti yok; fiyatlar sitesinde canlı bağlantıyla akıyor. Bu yüzden uygulama sırayla dener:<br>1) <b>Harem Altın</b> (açık bir adres denenir)<br>2) <b>doviz.com'daki Harem fiyatı</b> (gram altın ve gümüş)<br>3) <b>Genelpara</b> (altın ve döviz alış/satış)<br>4) <b>Truncgil piyasa verisi</b> (Türkiye piyasası, gram altın ve döviz alış/satış; Harem'e yakındır ama birebir aynı olmayabilir)<br>5) <b>TCMB</b> (dolar ve euro, resmî kur)<br>6) <b>Uluslararası spot</b> (son çare; kuyumcu fiyatından farklıdır).<br>Hepsi aynı anda denenir (doğrudan bağlantı olmazsa genel bir aktarım hizmetiyle de denenir); her kur, sırayla ilk çalışan kaynaktan alınır. Hiçbiri çalışmazsa son değerler kalır ve aşağıda hangi kaynağın neden başarısız olduğu yazar.<br>Hangi kaynağın kullanıldığı üstte ve burada yazar. <b>Alış</b> = kuyumcunun senden aldığı, <b>satış</b> = senin aldığın fiyat. Geçmiş tarihli fiyatlar (alış tarihi, fon karşılaştırması) ve hesaplayıcıdaki değişim tahminleri uluslararası spot kaynaklıdır.</p>${rateLog()}</div></div>
 <!--c:s_gos--><div class="card">${foldH('s_gos','<h2 style="margin:0">Göstergeler</h2>',0,`Enflasyon %${f(I.enfY)} · ${I.enfD}`)}<div ${isO('s_gos',0)?'':'hidden'} style="margin-top:10px"><p class="m">Enflasyon ve açlık/yoksulluk sınırı internetten otomatik çekilemez. Yeni veri çıkınca buraya yaz ya da bana "güncelle" de.</p>`+
  mk('Yıllık enflasyon %',I.enfY,'S.ind.enfY=num(this.value)')+mk('Aylık enflasyon %',I.enfA,'S.ind.enfA=num(this.value)')+
@@ -624,25 +633,71 @@ ${bkUI()}
 <label>Yedek metnini yapıştır</label><textarea id="ib" rows="3" placeholder="Yedek metni"></textarea><button class="g" onclick="impB()">Yapıştırılanı yükle</button>
 <h3>Otomatik yedekler (${B.length})</h3>`+(B.length?`<table>`+B.map((b,i)=>`<tr><td>${b.d}<br><span class="m">${b.t}</span></td><td><button class="g" onclick="restB(${i})">Geri yükle</button></td></tr>`).reverse().join('')+`</table>`:'<p class="m">Henüz yedek yok.</p>')+
  `</details></div>
-<!--c:s_upd--><div class="card"><h2>Uygulama güncelleme</h2><p class="m">Sürüm: ${APP_VER} (${o?'yüklenmiş':'fabrika'}). Yeni app.html dosyasını seç; GitHub ve APK gerekmez, verilerin korunur. Açılmazsa 5 saniye sonra eskisine dönülür.<br>Yeni APK kurman gerekirse önce Yedekleme bölümünden yedeği telefona kaydet.</p>
-<label>Dosyadan</label><input type="file" id="upf" onchange="pickApp(this)">
-<label>Ya da dosya metnini yapıştır</label><textarea id="upt" rows="2"></textarea><button class="g" onclick="installApp($('upt').value)">Yapıştırılanı yükle</button>
-<label>Ya da internet adresinden (isteğe bağlı)</label><input id="uru" value="${S.upUrl||''}" placeholder="https://.../app.html"><button class="g" onclick="urlUpd()">Adresten kontrol et ve yükle</button>
-<div><button class="g" onclick="revApp()" ${p?'':'disabled'}>Önceki sürüme dön</button><button class="g" onclick="facApp()" ${o?'':'disabled'}>Fabrika sürümüne dön</button></div></div>
 <!--c:s_ver--><div class="card"><h2>Veri</h2><p class="m">Kullanılan alan: ${(used/1024).toFixed(0)} KB · Geri/ileri geçmişi: ${HS.U.length+HS.R.length} adım</p>
 <button class="g" onclick="clrHist()">Geçmişi temizle</button><button class="d" onclick="resetAll()">Tüm verileri sıfırla</button></div>
-<!--c:pw-->${pwCard()}<!--c:s_hak--><div class="card"><h2>Hakkında</h2><p class="m">Yatırım Takip ${APP_VER} · ${wv}<br>Son kur güncellemesi: ${S.rates.t||'-'}<br>Veriler yalnızca bu telefonda saklanır.</p></div>`};
-function pickApp(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>installApp(String(r.result));r.readAsText(f)}
+<!--c:pw-->${pwCard()}<!--c:s_hak--><div class="card"><h2>Hakkında</h2><p class="m">Yatırım Takip ${APP_VER}${DEV_ALLOWED?' (geliştirici)':''} · ${wv}<br>Son kur güncellemesi: ${S.rates.t||'-'}<br>Veriler yalnızca bu telefonda saklanır.</p></div>`};
+// ---------- GELİŞTİRİCİ KÖPRÜSÜ (yalnızca DEV_ALLOWED=true sürümde) ----------
+const KDV='ytdv',KGH='ytgh',KGS='ytgs';
+function isDev(){try{return DEV_ALLOWED&&localStorage.getItem(KDV)==='1'}catch(e){return false}}
+function ghc(){try{return JSON.parse(localStorage.getItem(KGH)||'{}')||{}}catch(e){return{}}}
+function gst(){try{return JSON.parse(localStorage.getItem(KGS)||'null')}catch(e){return null}}
+const dBadge=(t,c)=>`<span class="bdg${c?' '+c:''}">${t}</span>`;
+function devH(k,t,sub,b,d){const o=isO(k,d);return `<div class="fh" onclick="tg('${k}',${d})"><div style="min-width:0"><h2 style="margin:0">${t}</h2><div class="m" style="margin-top:3px">${sub}</div></div><div style="display:flex;align-items:center;gap:8px;flex:none">${b}<span class="ar">${o?'▾':'▸'}</span></div></div>`}
+function devCards(){
+ if(!DEV_ALLOWED)return '';
+ if(!isDev())return `<!--c:s_upd--><div class="card"><h2>Geliştirici modu</h2><p class="m">Kapalı (güvenli). Açınca uygulama içi dosya güncelleme ve GitHub'a gönderme çalışır.</p><button class="g bw" onclick="devEnable()">Geliştirici modunu aç</button></div>`;
+ const o=!!localStorage.getItem('app_html'),p=!!localStorage.getItem('app_prev'),c=ghc(),gs=gst();
+ return `<!--c:s_upd--><div class="card">${devH('s_upd','Uygulama güncelleme','Sürüm '+APP_VER+(o?' (yüklü dosya)':' (fabrika)'),o?dBadge('Deneme sürümü'):'',1)}<div ${isO('s_upd',1)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Yeni app.html dosyasını seç; GitHub ve APK gerekmez, verilerin korunur. Açılmazsa 5 saniye sonra eskisine dönülür.<br>Yeni APK kurman gerekirse önce Yedekleme bölümünden yedeği telefona kaydet.</p>
+<button class="g bw" onclick="$('upf').click()">Dosyadan seç</button><input type="file" id="upf" accept=".html,.txt,text/html,text/plain" style="display:none" onchange="pickApp(this)">
+<textarea id="upt" rows="4" placeholder="Ya da dosya metnini yapıştır" style="margin-top:8px"></textarea><button class="g bw" onclick="installApp($('upt').value)">Yapıştırılanı uygula</button>
+<button class="g bw" onclick="revApp()" ${p?'':'disabled'}>Önceki sürüme dön</button><button class="bw w2" onclick="facApp()" ${o?'':'disabled'}>Fabrika sürüme dön</button></div></div>
+<!--c:s_git--><div class="card">${devH('s_git','GitHub bağlantısı',esc(c.repo||'Ayarlanmadı'),c.tok?dBadge('✓','ok2'):'',1)}<div ${isO('s_git',1)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Depo ve token sadece bu telefonda saklanır, yedeğe girmez. Token: yalnızca bu depo, "Contents: Read and write".</p>
+<input id="gr" placeholder="kullanici/depo" value="${esc(c.repo||'')}"><input id="gb" placeholder="dal (main)" value="${esc(c.br||'main')}"><input id="gt" type="password" autocomplete="off" placeholder="${c.tok?'Token kayıtlı (değiştirmek için yaz)':'Token'}"><button class="g bw" onclick="ghSave()">Kaydet</button>
+${o?`<button class="bw" onclick="ghSend(0)">Geliştirici sürümünü GitHub'a gönder</button><button class="g bw" onclick="ghSend(1)">Güvenli sürümü GitHub'a gönder</button>`:`<p class="m">Göndermek için önce yukarıdan bir deneme sürümü yükle.</p>`}
+<div class="gst${gs&&gs.e?' er':''}" id="gst" ${gs?'':'hidden'}>${gs?esc(gs.t+' - '+gs.m):''}</div></div></div>
+<!--c:s_dev--><div class="card">${devH('s_dev','Geliştirmeyi bitir','Riskli yöntemi kapatır',dBadge('Geliştirici açık'),0)}<div ${isO('s_dev',0)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Riskli geliştirici yöntemini kapatır: GitHub token'ı telefondan silinir, yüklü deneme sürümü kalkar, fabrika sürüme dönülür.</p><button class="d bw" onclick="devOff()">Geliştirmeyi bitir ve kapat</button></div></div>`}
+function devEnable(){if(!confirm("Geliştirici modu dışarıdan dosya yükleyip çalıştırmaya ve GitHub'a yazmaya izin verir. Sadece geliştirme sırasında açık kalmalı. Açılsın mı?"))return;try{localStorage.setItem(KDV,'1')}catch(e){}render()}
+function devOff(){if(!confirm("Riskli geliştirici yöntemi (uygulama içi dosya yükleme ve GitHub bağlantısı) kapatılacak. GitHub token'ı telefondan silinecek, yüklü deneme sürümü varsa fabrika sürüme dönülecek. Onaylıyor musun?"))return;
+ try{[KGH,KGS,KDV,'app_html','app_prev','app_try'].forEach(k=>localStorage.removeItem(k));localStorage.setItem('app_new','0');localStorage.setItem('app_msg','Geliştirici modu kapatıldı, fabrika sürüme dönüldü.')}catch(e){}location.reload()}
+function ghSave(){const c=ghc(),r=$('gr').value.trim(),b=$('gb').value.trim()||'main',t=$('gt').value.trim()||c.tok||'';if(!/^[\w.-]+\/[\w.-]+$/.test(r))return toast('Depo: kullanici/depo biçiminde');try{localStorage.setItem(KGH,JSON.stringify({repo:r,br:b,tok:t}))}catch(e){return toast('Kaydedilemedi')}toast('Kaydedildi');render()}
+function setGst(m,e){try{localStorage.setItem(KGS,JSON.stringify({t:nowS(),m:m,e:e?1:0}))}catch(x){}const el=$('gst');if(el){el.hidden=false;el.className='gst'+(e?' er':'');el.textContent=nowS()+' - '+m}}
+const ghH=c=>({'Authorization':'Bearer '+c.tok,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'});
+async function ghF(c,method,path,body){const url='https://api.github.com/repos/'+c.repo+'/contents/'+path,nh=NH(),q=method=='GET'?'?ref='+encodeURIComponent(c.br)+'&_='+Date.now():'';let st,data;
+ if(nh){const r=await nh.request({url:url+q,method:method,headers:ghH(c),data:body,responseType:'json',connectTimeout:20000,readTimeout:90000});st=r.status;data=r.data}
+ else{const r=await fetch(url+q,{method:method,headers:ghH(c),body:body?JSON.stringify(body):undefined,cache:'no-store'});st=r.status;data=await r.json().catch(()=>null)}
+ if(st==404&&method=='GET')return null;if(st<200||st>=300)throw st;return data}
+function b64e(t){return btoa(unescape(encodeURIComponent(t)))}
+function b64d(b){return decodeURIComponent(escape(atob(String(b).replace(/\s/g,''))))}
+function clBlock(h,v){const i=h.indexOf("{v:'"+v+"'");if(i<0)return '';const j=h.indexOf(']}',i);if(j<0)return '';const seg=h.slice(i,j),d=(seg.match(/d:'([^']*)'/)||[])[1]||'',k=seg.indexOf('t:[');if(k<0)return '';const rest=seg.slice(k+3),out=[],re=/'((?:[^'\\]|\\.)*)'/g;let m;while((m=re.exec(rest)))out.push('- '+m[1].replace(/\\'/g,"'"));return '## '+v+' ('+d+')\n'+out.join('\n')+'\n\n'}
+function insCl(cur,blk){if(/^#\s/.test(cur)){const n=cur.indexOf('\n');if(n<0)return cur+'\n\n'+blk;return cur.slice(0,n+1)+'\n'+blk+cur.slice(n+1).replace(/^\n+/,'')}return blk+cur}
+async function ghSend(safe){
+ if(!isDev())return;
+ const c=ghc(),raw=localStorage.getItem('app_html');
+ if(!c.repo||!c.tok)return toast('Önce depo ve token kaydet');
+ if(!raw)return toast('Yüklü deneme sürümü yok');
+ const v=(raw.match(/APP_VER='([^']+)'/)||[])[1]||'?',ON='var DEV_ALLOWED=';let html=raw,note='';
+ if(safe){if(html.indexOf(ON+'true;')<0)return toast('Dosyada DEV_ALLOWED=true bulunamadı');html=html.replace(ON+'true;',ON+'false;')}
+ if(!confirm((safe?'GÜVENLİ':'GELİŞTİRİCİ')+' sürüm '+v+' → '+c.repo+' ('+c.br+')\nwww/app.html ve CHANGELOG.md yazılacak.'+(safe?"\nBu APK'da geliştirici yöntemi kapalı olur.":'')+' Gönderilsin mi?'))return;
+ setGst('Gönderiliyor…');
+ try{
+  const f=await ghF(c,'GET','www/app.html');if(!f)throw 404;
+  await ghF(c,'PUT','www/app.html',{message:v+': '+(safe?'güvenli':'geliştirici')+' sürüm',content:b64e(html),branch:c.br,sha:f.sha});
+  const g=await ghF(c,'GET','CHANGELOG.md'),blk=clBlock(raw,v);
+  if(!g)note=' (CHANGELOG.md bulunamadı, atlandı)';
+  else{const cur=b64d(g.content);if(!blk||cur.indexOf('## '+v+' ')>=0)note=' (CHANGELOG zaten güncel)';else await ghF(c,'PUT','CHANGELOG.md',{message:v+': notlar',content:b64e(insCl(cur,blk)),branch:c.br,sha:g.sha})}
+  setGst('Gönderildi ✓ Actions derlemesi başladı.'+note);toast("GitHub'a gönderildi")
+ }catch(e){const m=e==401?'Token geçersiz veya süresi dolmuş':e==403?'Yetki yok (Contents: Read and write?)':e==404?'Depo, dal veya www/app.html bulunamadı':(e==409||e==422)?'Çakışma, tekrar dene':'Hata: '+(e&&e.message||e);setGst(m,1);toast(m)}}
+function pickApp(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>installApp(String(r.result));r.readAsText(f);el.value=''}
 function installApp(t){
- if(t.length<8000||t.indexOf('YT-A'+'PP')<0||t.indexOf('YT-O'+'K')<0)return alert('Bu dosya uygulama dosyası (app.html) değil ya da eksik.');
+ if(!isDev())return;t=String(t||'');
+ if(t.length<8000||t.indexOf('YT-A'+'PP')<0||t.indexOf('YT-O'+'K')<0||t.indexOf('</html>')<0)return alert('Bu dosya uygulama dosyası (app.html) değil ya da eksik.');
+ const dm=t.match(/var DEV_ALLOWED=(true|false)/);if(!dm||dm[1]!='true')return alert('Geliştirici sürümü değil (DEV_ALLOWED=true yok); uygulama içinden yüklenmez.');
  const rv=(t.match(/APP_VER='([^']+)'/)||[])[1]||'?';
  if(!confirm('Sürüm '+APP_VER+' → '+rv+' yüklensin mi? Önce otomatik yedek alınır; çalışmazsa eskisine dönülür.'))return;
  backup(true);
  const a=localStorage.getItem('app_html');
  if(a)localStorage.setItem('app_prev',a);else localStorage.removeItem('app_prev');
  localStorage.setItem('app_html',t);localStorage.setItem('app_new','1');localStorage.removeItem('app_try');location.reload()}
-async function urlUpd(){const u=($('uru').value||'').trim();if(!u)return alert('Önce adresi yaz');S.upUrl=u;save(true);
- try{const t=await hget(u+(u.indexOf('?')>=0?'&':'?')+'t='+Date.now(),15000);installApp(t)}catch(e){alert('Adres açılamadı')}}
 function revApp(){const p=localStorage.getItem('app_prev');if(!p)return;localStorage.setItem('app_html',p);localStorage.removeItem('app_prev');localStorage.setItem('app_new','0');localStorage.removeItem('app_try');location.reload()}
 function facApp(){if(!confirm('Fabrika sürümüne dönülsün mü? (Verilerin silinmez)'))return;['app_html','app_prev','app_try'].forEach(k=>localStorage.removeItem(k));localStorage.setItem('app_new','0');location.reload()}
 function restB(i){let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}if(B[i])applyJ(B[i].j)}
@@ -746,6 +801,8 @@ async function schedNotif(){const p=LN();if(!p)return;
   const tm=(S.nt.t||'09:00').split(':').map(Number),now=Date.now(),list=[];let id=1;
   S.funds.filter(x=>x.p==null&&!x.o).forEach(x=>{S.nt.off.forEach(k=>{const d=new Date(x.e+'T00:00:00');d.setDate(d.getDate()-k);d.setHours(tm[0]||0,tm[1]||0,0,0);
    if(d.getTime()>now+60000)list.push({id:id++,title:k?'Fon vadesine '+k+' gün kaldı':'Fon vadesi geldi',body:(x.n||'Fon')+' · '+f(x.a)+' TL · vade '+x.e,schedule:{at:d,allowWhileIdle:true}})})});
+  S.goals.filter(g=>g.d&&!(g.target>0&&g.saved>=g.target)).forEach(g=>{S.nt.off.forEach(k=>{const d=new Date(g.d+'T00:00:00');d.setDate(d.getDate()-k);d.setHours(tm[0]||0,tm[1]||0,0,0);
+   if(d.getTime()>now+60000)list.push({id:id++,title:k?'Hedef tarihine '+k+' gün kaldı':'Hedef tarihi geldi',body:(g.n||'Hedef')+' · hedef tarihi '+g.d,schedule:{at:d,allowWhileIdle:true}})})});
   if(list.length)await p.schedule({notifications:list});ntCount=list.length}catch(e){}}
 async function ntRefresh(){const e=$('ntst');if(!e)return;const p=LN();
  if(!p){e.innerHTML='Bu APK sürümünde telefon bildirimi yok. Şimdilik vade uyarısı, uygulamayı açtığında en üstte gösterilir. Telefon bildirimi için APK\'yı bir kez yenilemen gerekir.';return}
@@ -796,6 +853,7 @@ function pwLockNow(){UNL=false;render();toast('Kilitlendi')}
 function pwRemove(){if(!confirm('Şifre kaldırılsın mı? Tüm kilitler kalkar.'))return;S.pw={h:'',s:'',sec:{},hid:{}};UNL=false;save(true);render()}
 const pwFields=b=>`<input id="pw1" type="password" autocomplete="new-password" placeholder="Yeni şifre (en az 4 karakter)"><input id="pw2" type="password" autocomplete="new-password" placeholder="Şifreyi tekrar yaz" style="margin-top:6px"><button onclick="pwSet()" style="margin-top:8px">${b}</button>`;
 const SECT={s_gor:'Görünüm',s_kur:'Kurlar (TL)',s_bil:'Bildirimler',s_gun:'Güncelleme günlüğü',s_kay:'Kurlar nereden geliyor?',s_gos:'Göstergeler',s_yed:'Yedekleme',s_upd:'Uygulama güncelleme',s_ver:'Veri',s_hak:'Hakkında'};
+if(DEV_ALLOWED)Object.assign(SECT,{s_git:'GitHub bağlantısı',s_dev:'Geliştirmeyi bitir'});else delete SECT.s_upd;
 const anyLk=()=>!!(S.pw&&S.pw.h&&Object.values(S.pw.sec).some(Boolean));
 function pwFocus(){const e=$('pwi');if(e){e.scrollIntoView({block:'center'});e.focus()}}
 function lockCards(h){const p=h.split(/<!--c:([a-z_]+)-->/);let o=p[0];for(let i=1;i<p.length;i+=2){const id=p[i],seg=p[i+1];
@@ -826,6 +884,7 @@ document.addEventListener('touchend',()=>{const go=py!=null&&pd>90;py=null;pd=0;
 let scT;window.addEventListener('scroll',()=>{clearTimeout(scT);scT=setTimeout(()=>{UP.sy=Math.round(window.scrollY||0);UP.syt=tab;try{localStorage.setItem(KU,JSON.stringify(UP))}catch(e){}},500)},{passive:true});
 backup();render();
 if(UP.syt==tab&&UP.sy>0)setTimeout(()=>window.scrollTo(0,UP.sy),80);
+try{if(!DEV_ALLOWED)['app_html','app_prev',KDV,KGH,KGS].forEach(k=>localStorage.removeItem(k));else if(localStorage.getItem('app_html')&&!localStorage.getItem(KDV))localStorage.setItem(KDV,'1')}catch(e){}
 try{localStorage.setItem('app_new','0');localStorage.removeItem('app_try')}catch(e){}/*YT-OK*/
 schedNotif();refresh(true);
 </script></body></html>
