@@ -29,11 +29,13 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;t
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav><div id="pt" style="display:none;position:fixed;top:calc(64px + env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:9;color:#3ddc97;font-weight:700;pointer-events:none"></div>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='3.16';
+const APP_VER='3.17';
 var DEV_ALLOWED=true;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
 function upSave(){try{UP.tab=tab;UP.lg=LASTG;UP.open=UI.open;UP.m=UI.m;UP.st=UI.st;localStorage.setItem(KU,JSON.stringify(UP))}catch(e){}}
+const isB=x=>x.q>0&&!!x.k;
+const mat=x=>x.p==null&&!x.o&&x.e<today();
 const isO=(k,d)=>{const v=(UP.ac||{})[k];return v===undefined?!!d:!!v};
 function tg(k,d){UP.ac=UP.ac||{};UP.ac[k]=!isO(k,d);upSave();render()}
 const foldH=(k,t,d,sub)=>`<div class="fh" onclick="tg('${k}',${d?1:0})"><div style="min-width:0">${t}${sub?`<div class="m" style="margin-top:3px">${sub}</div>`:''}</div><span class="ar">${isO(k,d)?'▾':'▸'}</span></div>`;
@@ -146,7 +148,7 @@ async function refresh(auto){if(busy)return;if(auto&&S.lock&&S.rates.usd)return;
 function wk(s){if(!s)return '-';const p=s.split('-').map(Number),d=new Date(Date.UTC(p[0],p[1]-1,p[2]));const dn=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-dn+3);
  const y=d.getUTCFullYear(),j=new Date(Date.UTC(y,0,4)),w=1+Math.round(((d-j)/864e5-3+((j.getUTCDay()+6)%7))/7);return w+'. hafta'+(y!=p[0]?' ('+y+')':'')}
 function wkp(){const e=$('fsw');if(!e)return;e.textContent='Başlangıç: '+wk($('fs').value)+' · Vade: '+wk($('fe').value)}
-function fd(){const c=S.funds.filter(x=>x.p!=null&&!x.o);if(!c.length)return 0;
+function fd(){const c=S.funds.filter(x=>x.p!=null&&!x.o&&!(x.q>0));if(!c.length)return 0;
  return c.reduce((s,x)=>s+x.p/x.a/((day(x.e)-day(x.s))/864e5),0)/c.length}
 
 const V={};
@@ -165,13 +167,16 @@ function fundList(){
  const L=S.funds.filter(x=>(UI.st=='all'||(UI.st=='act'?x.p==null:x.p!=null))&&(!UI.d||x[key]==UI.d)&&(!q||((x.n||'')+' '+(x.k||'')+' '+x.a+' '+x.s+' '+x.e).toLowerCase().indexOf(q)>=0));
  if(!L.length)return '<div class="card m">Kayıt bulunamadı.</div>';
  L.sort((a,b)=>a[key]<b[key]?1:a[key]>b[key]?-1:b.id-a.id);
+ let pf='';
  const grp=(arr,fn)=>{const o={},ks=[];arr.forEach(x=>{const k=fn(x);if(!o[k]){o[k]=[];ks.push(k)}o[k].push(x)});return ks.map(k=>[k,o[k]])};
  const sm=a=>`<span class="m">· ${a.length} kayıt · ${f(a.reduce((s,x)=>s+x.a,0),0)} TL</span>`;
- const det=(k,t,inner,def)=>{k=UI.m+k;UI.keys.push(k);const o=UI.open[k]===undefined?(flt||def):UI.open[k];return `<details ${o?'open':''} ontoggle="UI.open['${k}']=this.open;upSave()"><summary>${t}</summary>${inner}</details>`};
- return grp(L,x=>x[key].slice(0,4)).map((ya,yi)=>det('y'+ya[0],`${ya[0]} ${sm(ya[1])}`,
+ const det=(k,t,inner,def)=>{k=UI.m+pf+k;UI.keys.push(k);const o=UI.open[k]===undefined?(flt||def):UI.open[k];return `<details ${o?'open':''} ontoggle="UI.open['${k}']=this.open;upSave()"><summary>${t}</summary>${inner}</details>`};
+ const tree=arr=>grp(arr,x=>x[key].slice(0,4)).map((ya,yi)=>det('y'+ya[0],`${ya[0]} ${sm(ya[1])}`,
   grp(ya[1],x=>x[key].slice(0,7)).map((ma,mi)=>det('m'+ma[0],`${MON[+ma[0].slice(5)-1]} ${ya[0]} ${sm(ma[1])}`,
    grp(ma[1],x=>{const w=wkn(x[key]);return w.y+'-'+w.w}).map((wa,wi)=>det('w'+ma[0]+wa[0],`${wkn(wa[1][0][key]).w}. hafta · ${wrng(wa[1][0][key])} ${sm(wa[1])}`,
-    grp(wa[1],x=>x[key]).map(da=>det('d'+da[0],`${dlab(da[0])} ${sm(da[1])}`,da[1].map(x=>fcard(x)).join(''),true)).join(''),yi==0&&mi==0&&wi==0)).join(''),yi==0&&mi==0)).join(''),yi==0)).join('')}
+    grp(wa[1],x=>x[key]).map(da=>det('d'+da[0],`${dlab(da[0])} ${sm(da[1])}`,da[1].map(x=>fcard(x)).join(''),true)).join(''),yi==0&&mi==0&&wi==0)).join(''),yi==0&&mi==0)).join(''),yi==0)).join('');
+ const sec=(p,t,arr)=>{if(!arr.length)return '';pf=p;const inner=tree(arr);pf=p;return det('g',`<b>${t}</b> ${sm(arr)}`,inner,true)};
+ return sec('B','Borsa fonları (kodlu)',L.filter(isB))+sec('P','Proje tercihli fonlar (elle girilen)',L.filter(x=>!isB(x)))}
 function fundCtl(){const op=isO('fkay',1);return `<div class="card">${foldH('fkay','<h2 style="margin:0">Fon kayıtları ('+S.funds.length+')</h2>',1,op?'':fsum())}</div><div ${op?'':'hidden'}><div class="card"><button onclick="fonNote()">Not defterine gönder</button><button class="g" onclick="fonTxt()">.txt kaydet</button></div><div class="card">${foldH('ffil','<h2 style="margin:0;font-size:16px">Filtre ve arama</h2>',0,(UI.d||UI.q||UI.st!='all')?'Filtre uygulanıyor':'')}<div ${isO('ffil',0)?'':'hidden'} style="margin-top:10px">
 <div class="row"><div><label>Grupla</label><select onchange="UI.m=this.value;rfl()">${sel(UI.m,[['s','Başlangıç tarihi'],['e','Vade tarihi']])}</select></div><div><label>Durum</label><select onchange="UI.st=this.value;rfl()">${sel(UI.st,[['all','Tümü'],['act','Aktif'],['done','Sonuçlanan']])}</select></div></div>
 <div class="row"><div><label>Tarihe git</label><input id="fg" type="date" value="${UI.d}" oninput="UI.d=this.value;rfl()"></div><div><label>Ara (ad / tutar)</label><input id="fq" value="${esc(UI.q)}" oninput="UI.q=this.value;rfl()"></div></div>
@@ -195,7 +200,7 @@ function fcard(x){
   if(x.q>0){const pr=qp(x),Qd=(S.q||{})[qn(x.k)],val=pr*x.q,pl=val-x.a;h+=`<br>Adet: <b>${f(x.q,x.q%1?4:0)}</b> · Birim maliyet: <b>${f(x.c,4)} TL</b>`;
    if(pr>0)h+=`<br>Anlık fiyat: <b>${f(pr,4)} TL</b> <span class="m">(${Qd?esc(Qd.src):'elle girilen'})</span>${Qd?`<br><span class="m">Son güncelleme: ${esc(Qd.t)}</span>`:''}<br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(pl/x.a*100)}`;
    else h+=`<br><span class="m">Anlık fiyat alınamadı${QE[qn(x.k)]?' ('+esc(String(QE[qn(x.k)]).slice(0,160))+')':''}. “Fiyatı güncelle”ye dokun ya da Düzelt → elle fiyat gir.</span>`}
-  h+=(x.o?'<br>Aktif — vadesiz':`<br>Aktif — vadeye ${Math.max(0,Math.ceil((day(x.e)-Date.now())/864e5))} gün`)+`<br><button onclick="fin(${x.id})">${x.q>0?'Sat / kapat':'Sonuçlandır'}</button>`+(x.q>0?'<button class="g" onclick="qNow()">Fiyatı güncelle</button>':'')}
+  h+=(x.o?'<br>Aktif — vadesiz':mat(x)?'<br><b>Vadesi doldu</b> — çektiysen Sonuçlandır\'a dokun. Sonuçlanana kadar toplam varlığa katılmaz.':`<br>Aktif — vadeye ${Math.max(0,Math.ceil((day(x.e)-Date.now())/864e5))} gün`)+`<br><button onclick="fin(${x.id})">${x.q>0?'Sat / kapat':'Sonuçlandır'}</button>`+(x.q>0?'<button class="g" onclick="qNow()">Fiyatı güncelle</button>':'')}
  else{const t=x.p/x.a*100;
   if(x.q>0)h+=`<br>Adet: <b>${f(x.q,x.q%1?4:0)}</b> · Maliyet: ${f(x.c,4)} TL`+(x.sp?` · Satış: ${f(x.sp,4)} TL`:'');
   h+=`<br>${x.p>=0?'Kâr':'Zarar'}: <b class="${x.p>=0?'up':'dn'}">${f(Math.abs(x.p))} TL</b> ${pc(t)}`+(days>0?`<br><span class="m">Haftalık %${f(t/days*7)} · Aylık %${f(t/days*30.4)} · Yıllık %${f(t/days*365)} (basit)</span>`:'');
@@ -214,15 +219,15 @@ function fcard(x){
 <button onclick="saveEd(${x.id},this)">Kaydet</button><button class="g" onclick="UI.ed=0;rfl()">İptal</button></div>`;
  return h+`</div>`}
 V.fon=()=>{const d=fd();
- return `<div class="card"><h2>Fon özeti</h2>`+(d?`3 aylık ort. getiri: <b>%${f(d*91*100)}</b><br>Aylık: %${f(d*30.4*100)} · Haftalık: %${f(d*7*100)}<br>Yıllık (3 ayda bir yeniden yatırım): %${f((Math.pow(1+d*91,4)-1)*100)}<p class="m">Geçmiş kayıtların ortalamasıdır, garanti değildir.</p>`:'Sonuçlanmış kayıt yok')+`</div>`+posCard()+`
-<div class="card"><h2>Yeni fon kaydı</h2>
+ return `<div class="card"><h2>Proje fon özeti</h2>`+(d?`3 aylık ort. getiri: <b>%${f(d*91*100)}</b><br>Aylık: %${f(d*30.4*100)} · Haftalık: %${f(d*7*100)}<br>Yıllık (3 ayda bir yeniden yatırım): %${f((Math.pow(1+d*91,4)-1)*100)}<p class="m">Geçmiş kayıtların ortalamasıdır, garanti değildir.</p>`:'Sonuçlanmış kayıt yok')+`</div>`+posCard()+`
+<div class="card">${foldH('fnew','<h2 style="margin:0">Yeni fon kaydı</h2>',1)}<div ${isO('fnew',1)?'':'hidden'} style="margin-top:10px">
 <input id="fn" placeholder="Ad / not (ör. hesap no)">
 <div class="row"><div><label>Kod (isteğe bağlı, ör. DMLKT)</label><input id="fk" autocapitalize="characters" placeholder="DMLKT"></div><div><label>Adet</label><input id="fqt" inputmode="decimal"></div></div>
 <label>Birim maliyet (TL) — adet girersen tutar otomatik hesaplanır</label><input id="fc" inputmode="decimal">
 <div class="row"><div><label>Başlangıç</label><input id="fs" type="date" value="${today()}" oninput="wkp()"></div><div><label>Vade (adetli kayıtta boş olabilir)</label><input id="fe" type="date" oninput="wkp()"></div></div><div class="m" id="fsw" style="margin-bottom:8px"></div>
 <label>Tutar (TL)</label><input id="fa" inputmode="decimal">
 <label>Kâr (TL) — vade dolduysa; boşsa aktif sayılır</label><input id="fp" inputmode="decimal">
-<button onclick="addF(this)">Kaydet</button></div>`+fundCtl()};
+<button onclick="addF(this)">Kaydet</button></div></div>`+fundCtl()};
 let lockF=false;
 async function addF(bt){if(lockF)return;
  const q=num($('fqt').value)||0,k=qn($('fk').value),nm=$('fn').value,s=$('fs').value;let a=num($('fa').value),c=num($('fc').value)||0,e=$('fe').value,o=0;
@@ -254,9 +259,9 @@ async function refQ(){const ks=[...new Set(S.funds.filter(x=>x.k&&x.p==null).map
  await Promise.all(ks.map(async k=>{const es=[];for(const s of QSRC){try{const v=await Promise.race([s[1](k),new Promise((_,j)=>setTimeout(()=>j(new Error('zaman aşımı')),20000))]);if(v>0){S.q[k]={p:v,t:nowS(),ts:Date.now(),src:s[0]};ok++;delete QE[k];return}}catch(e){es.push(s[0]+': '+(e&&e.message||e))}}QE[k]=es.join(' · ')}));
  if(ok)save(true);return ok}
 async function qNow(silent){if(!silent)toast('Fiyat alınıyor…');try{const n=await refQ();render();if(!silent)toast(n?'Fiyat güncellendi ✓':'Fiyat alınamadı')}catch(e){if(!silent)toast('Fiyat alınamadı')}}
-function fsum(){const A=S.funds.filter(x=>x.p==null),P=A.filter(x=>x.q>0&&qp(x)>0),pl=P.reduce((s,x)=>s+qp(x)*x.q-x.a,0);return A.length+' aktif'+(P.length?` · ${pl>=0?'kâr':'zarar'} ${f(Math.abs(pl))} TL`:'')}
+function fsum(){const A=S.funds.filter(x=>x.p==null&&!mat(x)),P=A.filter(x=>x.q>0&&qp(x)>0),pl=P.reduce((s,x)=>s+qp(x)*x.q-x.a,0);return A.length+' aktif'+(S.funds.some(mat)?' · '+S.funds.filter(mat).length+' vadesi doldu':'')+(P.length?` · ${pl>=0?'kâr':'zarar'} ${f(Math.abs(pl))} TL`:'')}
 function qStamp(P){const Z=P.map(x=>(S.q||{})[qn(x.k)]).filter(q=>q&&q.ts);if(!Z.length)return '';const o=Z.reduce((a,b)=>b.ts<a.ts?b:a);return `<p class="m">Fiyatlar en son: ${esc(o.t)}</p>`}
-function posCard(){const P=S.funds.filter(x=>x.p==null&&x.q>0);if(!P.length)return '';let cost=0,val=0,miss=0;
+function posCard(){const P=S.funds.filter(x=>x.p==null&&!mat(x)&&isB(x));if(!P.length)return '';let cost=0,val=0,miss=0;
  P.forEach(x=>{cost+=x.a;const pr=qp(x);if(pr>0)val+=pr*x.q;else{val+=x.a;miss++}});const pl=val-cost;
  return `<div class="card"><h2>Borsa fon / sertifika özeti</h2>Toplam maliyet: <b>${f(cost)} TL</b><br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(cost?pl/cost*100:0)}`+(miss?`<p class="m">${miss} kayıtta anlık fiyat alınamadı; o kayıtlar maliyetle sayıldı.</p>`:'')+qStamp(P)+`<button class="g" onclick="qNow()">Fiyatları güncelle</button></div>`}
 
@@ -403,7 +408,7 @@ function gsim(id){const g=S.goals.find(x=>x.id==id),o=$('go'+id),i=$('gx'+id);if
 // ---------- ZEKÂT ----------
 function wealth(){let nak=0,au=0,ag=0,us=0,eu=0,fon=0;
  S.assets.forEach(x=>{const v=x.m*px(x.t);if(x.t=='try')nak+=v;else if(x.t=='gold')au+=v;else if(x.t=='silver')ag+=v;else if(x.t=='usd')us+=v;else eu+=v});
- S.funds.forEach(x=>{if(x.p==null)fon+=(x.q>0&&qp(x)>0)?qp(x)*x.q:x.a});
+ S.funds.forEach(x=>{if(x.p==null&&!mat(x))fon+=(x.q>0&&qp(x)>0)?qp(x)*x.q:x.a});
  const tot=nak+fon+au+ag+us+eu;return{nak,fon,au,ag,us,eu,tot,gr:S.rates.gold?tot/S.rates.gold:0}}
 const HM=['Muharrem','Safer','Rebiülevvel','Rebiülahir','Cemaziyelevvel','Cemaziyelahir','Recep','Şaban','Ramazan','Şevval','Zilkade','Zilhicce'];
 function g2h(d){const y=d.getFullYear(),m=d.getMonth()+1,dd=d.getDate(),a=Math.floor((m-14)/12);
@@ -590,6 +595,7 @@ function asgCalc(){const o=$('ab');if(!o)return;const A=S.asg,lim=A.net*2/3;EVN=
 // ---------- KURLAR / GÖSTERGELER / YEDEK ----------
 const mk=(lbl,val,hd)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${hd};save();render()">`;
 const CHANGELOG=[
+{v:'3.17',d:'2026-10-31',t:['Fon sekmesi: "Yeni fon kaydı" kartına aç/kapa oku eklendi.','Fon kayıtları iki gruba ayrıldı: Borsa fonları (kodlu, fiyatı çekilen) ve Proje tercihli fonlar (elle girilen). Her grubun kendi başlığı, sayısı ve toplamı var.','Vadesi geçmiş ve henüz sonuçlandırılmamış fonlar toplam varlığa, fon özetine ve borsa özetine katılmaz; kartında "Vadesi doldu" yazar.','Borsa fon / sertifika özeti yalnızca kodlu (DMLKT) kayıtları sayar; "Fon özeti" artık "Proje fon özeti": yalnızca elle girilen vadeli kayıtların getirisini hesaplar.']},
 {v:'3.16',d:'2026-10-31',t:['Kur uyarısı (isteğe bağlı): Ayarlar → Bildirimler\'de kur ve eşik seçilir; uygulama açılınca ve kurlar güncellenince kontrol edilir, bildirim izni açınca istenir. Uygulama kapalıyken kur çekilmez.','Yeni sürüm uyarısı: uygulama açılınca sürüm bilgisine bakar, yeni sürüm varsa üstte haber verir ve indirme sayfasını açar. Uygulama kendini değiştirmez.','Hakkında: Güncellemeyi denetle düğmesi.']},
 {v:'3.15',d:'2026-10-31',t:['Geliştirici kartları (Uygulama güncelleme, GitHub bağlantısı, Geliştirmeyi bitir) Ayarlar\'ın en üstüne taşındı.','Bildirimler: hedef tarihi yaklaşınca da telefon bildirimi gelir (vade ile aynı gün ayarları; tamamlanan hedefler hariç).']},
 {v:'3.14',d:'2026-10-31',t:['Geliştirici köprüsü: Ayarlar\'da Uygulama güncelleme, GitHub bağlantısı ve Geliştirmeyi bitir kartları. Denenen sürüm uygulamadan GitHub\'a gönderilir, CHANGELOG.md de yazılır.','Güvenli sürüm (DEV_ALLOWED=false) bu kartları gizler ve deneme dosyalarını siler.','Adresten güncelleme kaldırıldı.']},
