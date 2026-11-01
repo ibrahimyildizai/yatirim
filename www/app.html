@@ -2,14 +2,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Yatırım Takip</title>
 <style>
-:root{color-scheme:dark;--bg:#0f1419;--c:#1a222c;--t:#e8edf2;--m:#8a97a6;--a:#3ddc97;--r:#ff6b6b;--b:#2a7fff;--in:#0f1419;--bd:#2f3b49;--b2:#2f3b49;--nv:#141b23;--tb:#2a3542}
+:root{--rc:14px;--ri:10px;--rp:20px;--rs:8px;--rb:14px;color-scheme:dark;--bg:#0f1419;--c:#1a222c;--t:#e8edf2;--m:#8a97a6;--a:#3ddc97;--r:#ff6b6b;--b:#2a7fff;--in:#0f1419;--bd:#2f3b49;--b2:#2f3b49;--nv:#141b23;--tb:#2a3542}
 [data-theme=light]{color-scheme:light;--bg:#eef1f5;--c:#ffffff;--t:#1b2430;--m:#5f6b7a;--a:#0f9d63;--r:#d63a3a;--in:#f4f6f9;--bd:#cfd6df;--b2:#dfe5ec;--nv:#ffffff;--tb:#e1e6ed}
+[data-theme=black]{color-scheme:dark;--bg:#000;--c:#0c0c0c;--t:#e8edf2;--m:#8a97a6;--a:#3ddc97;--r:#ff6b6b;--in:#000;--bd:#2a2a2a;--b2:#232323;--nv:#050505;--tb:#1c1c1c}
+[data-shape=flat]{--rc:4px;--ri:3px;--rp:4px;--rs:3px;--rb:4px}
 *{box-sizing:border-box}body{overscroll-behavior-y:contain;margin:0;background:var(--bg);color:var(--t);font:15px system-ui,sans-serif;padding:0 0 84px}
-.w{padding:8px 12px}.card{background:var(--c);border-radius:14px;padding:14px;margin-bottom:12px}
+.w{padding:8px 12px}.card{background:var(--c);border-radius:var(--rc);padding:14px;margin-bottom:12px}
 h2{margin:0 0 10px;font-size:17px}h3{margin:10px 0 4px;font-size:13px;color:var(--m)}
-input,select,textarea{width:100%;padding:11px;margin:4px 0 8px;border-radius:10px;border:1px solid var(--bd);background:var(--in);color:var(--t);font-size:15px}
+input,select,textarea{width:100%;padding:11px;margin:4px 0 8px;border-radius:var(--ri);border:1px solid var(--bd);background:var(--in);color:var(--t);font-size:15px}
 label{font-size:12px;color:var(--m)}
-button{background:var(--b);color:#fff;border:0;border-radius:10px;padding:11px 14px;font-size:15px;margin:4px 4px 0 0}
+button{background:var(--b);color:#fff;border:0;border-radius:var(--ri);padding:11px 14px;font-size:15px;margin:4px 4px 0 0}
 button.g{background:var(--b2);color:var(--t)}button.d{background:#6b2b2b}button:disabled{opacity:.35}
 .row{display:flex;gap:8px}.row>*{flex:1}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .up{color:var(--a)}.dn{color:var(--r)}.m{color:var(--m);font-size:12px}.ok{color:var(--a);font-weight:700;font-size:17px;line-height:1.35}
@@ -18,18 +20,18 @@ button.g{background:var(--b2);color:var(--t)}button.d{background:#6b2b2b}button:
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--nv);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;border-radius:0;margin:0;padding:14px 0;min-width:0;font-size:clamp(12px,4.5vw,18px);white-space:nowrap;overflow:hidden;font-weight:700;color:var(--m);border-top:4px solid transparent}
 nav button.on{color:var(--b);border-top-color:var(--b)}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 10px}.chips button{margin:0;padding:10px 16px;border-radius:20px;font-size:16px;background:var(--b2);color:var(--t)}.chips button.on{background:var(--b);color:#fff}
-details{margin:4px 0}details details{margin-left:8px}summary{cursor:pointer;padding:10px 12px;background:var(--nv);border-radius:10px;margin:6px 0;font-weight:700;list-style:none}summary::-webkit-details-marker{display:none}summary::before{content:'▸ ';color:var(--a)}details[open]>summary::before{content:'▾ '}
-.pb{height:12px;background:var(--in);border-radius:8px;overflow:hidden}.pb>i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--a))}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 10px}.chips button{margin:0;padding:10px 16px;border-radius:var(--rp);font-size:16px;background:var(--b2);color:var(--t)}.chips button.on{background:var(--b);color:#fff}.fx{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}.fx.cl{margin-bottom:0!important}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px}.chips button.on .dot{box-shadow:0 0 0 2px #fff}
+details{margin:4px 0}details details{margin-left:8px}summary{cursor:pointer;padding:10px 12px;background:var(--nv);border-radius:var(--ri);margin:6px 0;font-weight:700;list-style:none}summary::-webkit-details-marker{display:none}summary::before{content:'▸ ';color:var(--a)}details[open]>summary::before{content:'▾ '}
+.pb{height:12px;background:var(--in);border-radius:var(--rs);overflow:hidden}.pb>i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--a))}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;text-align:right;border-bottom:1px solid var(--tb)}td:first-child,th:first-child{text-align:left}
-.fh{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}.ar{flex:none;width:32px;height:32px;border-radius:10px;background:var(--b2);color:var(--t);display:flex;align-items:center;justify-content:center;font-size:15px}[hidden]{display:none!important}
+.fh{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}.ar{flex:none;width:32px;height:32px;border-radius:var(--ri);background:var(--b2);color:var(--t);display:flex;align-items:center;justify-content:center;font-size:15px}[hidden]{display:none!important}
 .bw{display:block;width:100%;margin:8px 0 0;padding:14px}.bw.w2{background:#f2edf2;color:#111}
-.bdg{font-size:12px;font-weight:700;padding:5px 10px;border-radius:14px;background:rgba(245,183,58,.18);color:#e0a020;white-space:nowrap}.bdg.ok2{background:rgba(61,220,151,.18);color:var(--a)}
-.gst{margin-top:10px;padding:10px 12px;border-radius:10px;border-left:4px solid var(--a);background:rgba(61,220,151,.1);color:var(--a);font-size:13px;line-height:1.4}.gst.er{border-left-color:var(--r);background:rgba(255,107,107,.1);color:var(--r)}
+.bdg{font-size:12px;font-weight:700;padding:5px 10px;border-radius:var(--rb);background:rgba(245,183,58,.18);color:#e0a020;white-space:nowrap}.bdg.ok2{background:rgba(61,220,151,.18);color:var(--a)}
+.gst{margin-top:10px;padding:10px 12px;border-radius:var(--ri);border-left:4px solid var(--a);background:rgba(61,220,151,.1);color:var(--a);font-size:13px;line-height:1.4}.gst.er{border-left-color:var(--r);background:rgba(255,107,107,.1);color:var(--r)}
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav><div id="pt" style="display:none;position:fixed;top:calc(64px + env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:9;color:#3ddc97;font-weight:700;pointer-events:none"></div>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='3.17';
+const APP_VER='3.19';
 var DEV_ALLOWED=true;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
@@ -37,6 +39,7 @@ function upSave(){try{UP.tab=tab;UP.lg=LASTG;UP.open=UI.open;UP.m=UI.m;UP.st=UI.
 const isB=x=>x.q>0&&!!x.k;
 const mat=x=>x.p==null&&!x.o&&x.e<today();
 const isO=(k,d)=>{const v=(UP.ac||{})[k];return v===undefined?!!d:!!v};
+function foldAll(){try{document.querySelectorAll('#v .card').forEach(c=>{const h=c.firstElementChild;if(!h||h.tagName!=='H2'||h.classList.contains('fx')||!h.nextSibling)return;const k='h:'+tab+':'+h.textContent.replace(/\s*\(\d+\)/g,'').trim().slice(0,40);const b=document.createElement('div');b.className='fb';while(h.nextSibling)b.appendChild(h.nextSibling);c.appendChild(b);const ar=document.createElement('span');ar.className='ar';h.appendChild(ar);h.classList.add('fx');const ap=()=>{const o=isO(k,1);b.hidden=!o;ar.textContent=o?'▾':'▸';h.classList.toggle('cl',!o)};ap();h.onclick=()=>{UP.ac=UP.ac||{};UP.ac[k]=!isO(k,1);upSave();ap()}})}catch(e){}}
 function tg(k,d){UP.ac=UP.ac||{};UP.ac[k]=!isO(k,d);upSave();render()}
 const foldH=(k,t,d,sub)=>`<div class="fh" onclick="tg('${k}',${d?1:0})"><div style="min-width:0">${t}${sub?`<div class="m" style="margin-top:3px">${sub}</div>`:''}</div><span class="ar">${isO(k,d)?'▾':'▸'}</span></div>`;
 const IND0={v:1,enfY:29.73,enfA:1.84,enfD:'Eylül 2026 (TÜİK)',aclik:37800.92,yoks:123130,aclikD:'Eylül 2026 (Türk-İş)'};
@@ -45,8 +48,8 @@ const _d0=(()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth(
 const EMP0={v:1,birth:'1990-01-01',start:'2015-01-01',tescil:'2015-01-01',prim:0,primD:_d0,work:true,rate:30,paths:[{n:'60 yaş + 7000 gün',age:60,days:7000,sig:0},{n:'60 yaş + 4500 gün + 25 yıl sigortalılık',age:60,days:4500,sig:25}],pay:{aylik:0,ek:0,d:_d0,ort:0,ortY:0,o2:0,o3:0,p1:0,p2:0,p3:0,raise:2,real:0,grow:0}};
 const DEF=()=>({rates:{usd:0,eur:0,gold:0,silver:0,t:''},
 funds:[],
-assets:[],snaps:[],per:7,ind:Object.assign({},IND0),zk:{g:80.18,d:'',v:2},lock:false,past:null,nt:{on:true,off:[0,1],t:'09:00'},goals:[],pw:{h:'',s:'',sec:{},hid:{}},first:false,th:{m:'dark',c:'blue'},asg:Object.assign({},ASG0),emp:JSON.parse(JSON.stringify(EMP0)),eb:{n:'',g1:'',g2:'',g3:'',oran:'',agir:'',ev:''},q:{},ka:{on:false,k:'usd',d:'up',v:0,hit:'',ok:0}});
-function norm(s){const o=Object.assign(DEF(),s||{});if(!o.ind||(o.ind.v||0)<IND0.v)o.ind=Object.assign({},IND0);if(!o.zk)o.zk={g:80.18,d:'',v:2};if(!o.nt||!Array.isArray(o.nt.off))o.nt={on:true,off:[0,1],t:'09:00'};if(!o.zk.v){o.zk.v=2;if(o.zk.g==81)o.zk.g=80.18}if(!o.th)o.th={m:'dark',c:'blue'};if(!o.asg||(o.asg.v||0)<ASG0.v)o.asg=Object.assign({},ASG0);if(!o.emp||(o.emp.v||0)<EMP0.v)o.emp=JSON.parse(JSON.stringify(EMP0));if(!o.pw||typeof o.pw!='object'||!o.pw.sec)o.pw={h:'',s:'',sec:{},hid:{}};if(!o.pw.hid)o.pw.hid={};return o}
+assets:[],snaps:[],per:7,ind:Object.assign({},IND0),zk:{g:80.18,d:'',v:2},lock:false,past:null,nt:{on:true,off:[0,1],t:'09:00'},goals:[],pw:{h:'',s:'',sec:{},hid:{}},first:false,th:{m:'dark',c:'blue',s:'round'},asg:Object.assign({},ASG0),emp:JSON.parse(JSON.stringify(EMP0)),eb:{n:'',g1:'',g2:'',g3:'',oran:'',agir:'',ev:''},q:{},ka:{on:false,k:'usd',d:'up',v:0,hit:'',ok:0}});
+function norm(s){const o=Object.assign(DEF(),s||{});if(!o.ind||(o.ind.v||0)<IND0.v)o.ind=Object.assign({},IND0);if(!o.zk)o.zk={g:80.18,d:'',v:2};if(!o.nt||!Array.isArray(o.nt.off))o.nt={on:true,off:[0,1],t:'09:00'};if(!o.zk.v){o.zk.v=2;if(o.zk.g==81)o.zk.g=80.18}if(!o.th)o.th={m:'dark',c:'blue',s:'round'};if(!o.th.s)o.th.s='round';if(!o.asg||(o.asg.v||0)<ASG0.v)o.asg=Object.assign({},ASG0);if(!o.emp||(o.emp.v||0)<EMP0.v)o.emp=JSON.parse(JSON.stringify(EMP0));if(!o.pw||typeof o.pw!='object'||!o.pw.sec)o.pw={h:'',s:'',sec:{},hid:{}};if(!o.pw.hid)o.pw.hid={};return o}
 const FRESH=!localStorage.getItem(K);
 let S;try{S=norm(JSON.parse(localStorage.getItem(K)||'null'))}catch(e){S=norm()}
 if(FRESH)S.first=true;
@@ -406,10 +409,10 @@ function gsim(id){const g=S.goals.find(x=>x.id==id),o=$('go'+id),i=$('gx'+id);if
  const c=gcalc(g),m1=12-new Date().getMonth(),n1=c.C+v,n2=c.C+v*m1,p=x=>Math.min(100,x/c.T*100);
  o.innerHTML=`<span style="color:var(--t)">Bu ay <b>${fu(v,c.k)}</b> eklersen: birikim ${fu(n1,c.k)} (<b>%${f(p(n1),1)}</b>), hedefe <b>${fu(Math.max(0,c.T-n1),c.k)}</b> kalır.<br>Yıl sonuna kadar (${m1} ay) her ay ${fu(v,c.k)}: toplam +${fu(v*m1,c.k)} → <b>%${f(p(n2),1)}</b>, hedefe <b>${fu(Math.max(0,c.T-n2),c.k)}</b> kalır.<br>Aynı tempoyla ≈ <b>${Math.ceil(c.rem/v)} ay</b> (${addM(c.rem/v)}).</span>`}
 // ---------- ZEKÂT ----------
-function wealth(){let nak=0,au=0,ag=0,us=0,eu=0,fon=0;
+function wealth(){let nak=0,au=0,ag=0,us=0,eu=0,fon=0;const fl=[];
  S.assets.forEach(x=>{const v=x.m*px(x.t);if(x.t=='try')nak+=v;else if(x.t=='gold')au+=v;else if(x.t=='silver')ag+=v;else if(x.t=='usd')us+=v;else eu+=v});
- S.funds.forEach(x=>{if(x.p==null&&!mat(x))fon+=(x.q>0&&qp(x)>0)?qp(x)*x.q:x.a});
- const tot=nak+fon+au+ag+us+eu;return{nak,fon,au,ag,us,eu,tot,gr:S.rates.gold?tot/S.rates.gold:0}}
+ S.funds.forEach(x=>{if(x.p==null&&!mat(x)){const v=(x.q>0&&qp(x)>0)?qp(x)*x.q:x.a;fon+=v;fl.push({n:(x.n||'Fon')+(x.k?' ('+x.k+')':'')+' · '+x.s,v:v})}});
+ const tot=nak+fon+au+ag+us+eu;return{fl,nak,fon,au,ag,us,eu,tot,gr:S.rates.gold?tot/S.rates.gold:0}}
 const HM=['Muharrem','Safer','Rebiülevvel','Rebiülahir','Cemaziyelevvel','Cemaziyelahir','Recep','Şaban','Ramazan','Şevval','Zilkade','Zilhicce'];
 function g2h(d){const y=d.getFullYear(),m=d.getMonth()+1,dd=d.getDate(),a=Math.floor((m-14)/12);
  const jd=Math.floor(1461*(y+4800+a)/4)+Math.floor(367*(m-2-12*a)/12)-Math.floor(3*Math.floor((y+4900+a)/100)/4)+dd-32075;
@@ -431,6 +434,7 @@ V.zek=()=>{const w=wealth(),g=+S.zk.g||80.18,ok=S.rates.gold>0&&w.gr>=g;
  else if(ok)h+=`<div class="ok">Tebrikler! Toplam varlığınız ${f(w.gr)} gr altın değerinde; zekât nisabına (${f(g)} gr) ulaştınız.</div>`;
  else h+=`<p>Toplam varlığınız ${f(w.gr)} gr altın değerinde. Nisaba (${f(g)} gr) <b>${f(g-w.gr)} gr</b> (≈ ${f((g-w.gr)*S.rates.gold)} TL) kaldı.</p>`;
  h+=`<table>${r('Nakit (TL)',w.nak)}${r('Aktif fon (anapara)',w.fon)}${r('Altın',w.au)}${r('Gümüş',w.ag)}${r('Dolar',w.us)}${r('Euro',w.eu)}<tr><td><b>Toplam</b></td><td><b>${f(w.tot)} TL</b></td></tr></table>`;
+ h+=`<details><summary>Aktif fon kalemleri (${w.fl.length})</summary>${w.fl.length?w.fl.map(o=>`<div class="m" style="margin:6px 4px;font-size:13px;color:var(--t)">• ${esc(o.n)}: <b>${f(o.v)} TL</b></div>`).join(''):'<div class="m">Aktif fon yok.</div>'}</details>`;
  if(ok)h+=`<p>Zekât (kırkta bir, %2,5): <b>${f(w.tot*0.025)} TL</b> <span class="m">(yıl dönümünde)</span></p>`;
  if(S.zk.d){const d0=new Date(S.zk.d+'T12:00:00'),d1=hawl(d0),left=Math.ceil((d1-Date.now())/864e5);
   h+=`<h3>Nisaba ulaşılan tarih</h3><div>Miladi: ${gf(d0)}</div><div>Hicri: ${hf(d0)}</div><h3>Yıl dönümü (hawl)</h3><div>Miladi: ${gf(d1)}</div><div>Hicri: ${hf(d1)}</div><div>${left>0?left+' gün kaldı':'<b class="up">Zekât vakti geldi</b>'}</div>`;
@@ -595,7 +599,9 @@ function asgCalc(){const o=$('ab');if(!o)return;const A=S.asg,lim=A.net*2/3;EVN=
 // ---------- KURLAR / GÖSTERGELER / YEDEK ----------
 const mk=(lbl,val,hd)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${hd};save();render()">`;
 const CHANGELOG=[
-{v:'3.17',d:'2026-10-31',t:['Fon sekmesi: "Yeni fon kaydı" kartına aç/kapa oku eklendi.','Fon kayıtları iki gruba ayrıldı: Borsa fonları (kodlu, fiyatı çekilen) ve Proje tercihli fonlar (elle girilen). Her grubun kendi başlığı, sayısı ve toplamı var.','Vadesi geçmiş ve henüz sonuçlandırılmamış fonlar toplam varlığa, fon özetine ve borsa özetine katılmaz; kartında "Vadesi doldu" yazar.','Borsa fon / sertifika özeti yalnızca kodlu (DMLKT) kayıtları sayar; "Fon özeti" artık "Proje fon özeti": yalnızca elle girilen vadeli kayıtların getirisini hesaplar.']},
+{v:'3.19',d:'2026-11-01',t:['Tüm kart başlıkları okla açılıp kapanır (▾/▸). Durum hatırlanır; yazdığın değerler kapatıp açınca silinmez.']},
+{v:'3.18',d:'2026-11-01',t:['Görünüm (Gider ile ortak): Siyah tema, Yuvarlak/Düz tasarım, Klasik ve Grafit renkleri eklendi; "Otomatik" adı "Sistemi takip et" oldu.','Görünüm kartı başlığında seçili ayarların özet satırı (ör. Koyu · Mavi · Yuvarlak); renk düğmelerinde renk noktası.']},
+{v:'3.17',d:'2026-10-31',t:['Fon sekmesi: "Yeni fon kaydı" kartına aç/kapa oku eklendi.','Fon kayıtları iki gruba ayrıldı: Borsa fonları (kodlu, fiyatı çekilen) ve Proje tercihli fonlar (elle girilen). Her grubun kendi başlığı, sayısı ve toplamı var.','Zekât ekranına "Aktif fon kalemleri" listesi eklendi: toplamın hangi kayıtlardan oluştuğu görünür.','Vadesi geçmiş ve henüz sonuçlandırılmamış fonlar toplam varlığa, fon özetine ve borsa özetine katılmaz; kartında "Vadesi doldu" yazar.','Borsa fon / sertifika özeti yalnızca kodlu (DMLKT) kayıtları sayar; "Fon özeti" artık "Proje fon özeti": yalnızca elle girilen vadeli kayıtların getirisini hesaplar.']},
 {v:'3.16',d:'2026-10-31',t:['Kur uyarısı (isteğe bağlı): Ayarlar → Bildirimler\'de kur ve eşik seçilir; uygulama açılınca ve kurlar güncellenince kontrol edilir, bildirim izni açınca istenir. Uygulama kapalıyken kur çekilmez.','Yeni sürüm uyarısı: uygulama açılınca sürüm bilgisine bakar, yeni sürüm varsa üstte haber verir ve indirme sayfasını açar. Uygulama kendini değiştirmez.','Hakkında: Güncellemeyi denetle düğmesi.']},
 {v:'3.15',d:'2026-10-31',t:['Geliştirici kartları (Uygulama güncelleme, GitHub bağlantısı, Geliştirmeyi bitir) Ayarlar\'ın en üstüne taşındı.','Bildirimler: hedef tarihi yaklaşınca da telefon bildirimi gelir (vade ile aynı gün ayarları; tamamlanan hedefler hariç).']},
 {v:'3.14',d:'2026-10-31',t:['Geliştirici köprüsü: Ayarlar\'da Uygulama güncelleme, GitHub bağlantısı ve Geliştirmeyi bitir kartları. Denenen sürüm uygulamadan GitHub\'a gönderilir, CHANGELOG.md de yazılır.','Güvenli sürüm (DEV_ALLOWED=false) bu kartları gizler ve deneme dosyalarını siler.','Adresten güncelleme kaldırıldı.']},
@@ -613,8 +619,9 @@ V.krl=()=>lockCards(krl0());
 const krl0=()=>{setTimeout(ntRefresh,0);if(anyLk()&&!UNL)setTimeout(()=>{const e=$('pwi');e&&e.focus()},80);if(FLIST===undefined&&FL()&&YF()){FLIST='yük';fLoad()}let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}const I=S.ind;
  let used=0;try{for(const k in localStorage)if(Object.prototype.hasOwnProperty.call(localStorage,k))used+=(k.length+String(localStorage[k]).length)*2}catch(e){}
  const o=!!localStorage.getItem('app_html'),p=!!localStorage.getItem('app_prev'),wv=(navigator.userAgent.match(/Chrome\/[\d.]+/)||['?'])[0];
- return `${devCards()}<!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0)}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['dark','Koyu'],['light','Açık'],['auto','Otomatik']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
-<label>Vurgu rengi</label><div class="chips">${Object.entries(ACC).map(a=>`<button style="background:${a[1][1]};color:#fff;${S.th.c==a[0]?'outline:3px solid var(--t)':''}" onclick="setAcc('${a[0]}')">${S.th.c==a[0]?'✓ ':''}${a[1][0]}</button>`).join('')}</div></div></div>
+ return `${devCards()}<!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0,thSum())}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['auto','Sistemi takip et'],['light','Açık'],['dark','Koyu'],['black','Siyah']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
+<label>Renk</label><div class="chips">${Object.entries(ACC).map(a=>`<button class="${S.th.c==a[0]?'on':''}" onclick="setAcc('${a[0]}')"><i class="dot" style="background:${a[1][1]}"></i>${a[1][0]}</button>`).join('')}</div>
+<label>Tasarım</label><div class="chips">${[['round','Yuvarlak'],['flat','Düz']].map(t=>`<button class="${(S.th.s=='flat'?'flat':'round')==t[0]?'on':''}" onclick="setShape('${t[0]}')">${t[1]}</button>`).join('')}</div></div></div>
 <!--c:s_kur--><div class="card">${foldH('s_kur','<h2 style="margin:0">Kurlar (TL)</h2>',0,`Son: ${S.rates.t||'-'} · ${srcText(S.rates.src)}`)}<div ${isO('s_kur',0)?'':'hidden'} style="margin-top:10px"><p class="m">Son güncelleme: ${S.rates.t||'-'}<br>Kaynak: <b>${srcText(S.rates.src)}</b><br>Gram altın: alış ${f(S.rates.gold)} · satış ${f(S.rates.goldS||S.rates.gold)} TL<br>Aşağıdaki kutular <b>alış</b> fiyatıdır (kuyumcunun senden aldığı); portföy değeri bununla hesaplanır. Elle düzeltebilirsin.</p>`+
  [['gold','Gram altın (alış)'],['silver','Gram gümüş (alış)'],['usd','Dolar (alış)'],['eur','Euro (alış)']].map(([k,n])=>mk(n,S.rates[k]?(+S.rates[k]).toFixed(2):'',`S.rates.${k}=num(this.value)`)).join('')+
  `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto;margin:0" ${S.lock?'checked':''} onchange="S.lock=this.checked;save()"> Elle girdiğim kurları koru (açılışta otomatik çekme)</label>
@@ -815,11 +822,14 @@ async function fonTxt(){const t=fonText(),d=new Date(),name='fon-kayitlari-'+tod
 
 function pickBackup(){let i=$('bkf');if(!i){i=document.createElement('input');i.type='file';i.id='bkf';i.style.display='none';
  i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(String(r.result));if(!o.funds)throw 0;applyJ(JSON.stringify(o))}catch(e){alert('Bu dosya bir Yatırım Takip yedeği değil.')}i.value=''};r.readAsText(f)};document.body.appendChild(i)}i.click()}
-const ACC={blue:['Mavi','#2a7fff'],green:['Yeşil','#1fae6b'],purple:['Mor','#8b5cf6'],orange:['Turuncu','#f08c1b'],pink:['Pembe','#e5509a'],teal:['Turkuaz','#14b8c4']};
+const ACC={blue:['Mavi','#2a7fff'],green:['Yeşil','#1fae6b'],purple:['Mor','#8b5cf6'],orange:['Turuncu','#f08c1b'],pink:['Pembe','#e5509a'],teal:['Turkuaz','#14b8c4'],classic:['Klasik','#e5173f'],graphite:['Grafit','#4d5b70']};
+const THM={dark:'Koyu',light:'Açık',black:'Siyah',auto:'Sistemi takip et'};
+function thSum(){return [THM[S.th.m]||'Koyu',(ACC[S.th.c]||ACC.blue)[0],S.th.s=='flat'?'Düz':'Yuvarlak'].join(' · ')}
 function applyTheme(){let m=S.th.m;if(m=='auto')m=(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
- document.documentElement.setAttribute('data-theme',m);document.documentElement.style.setProperty('--b',(ACC[S.th.c]||ACC.blue)[1])}
+ document.documentElement.setAttribute('data-theme',m);document.documentElement.setAttribute('data-shape',S.th.s=='flat'?'flat':'round');document.documentElement.style.setProperty('--b',(ACC[S.th.c]||ACC.blue)[1])}
 function setTh(m){S.th.m=m;save();render()}
 function setAcc(c){S.th.c=c;save();render()}
+function setShape(v){S.th.s=v;save();render()}
 function clrHist(){HS={U:[],R:[]};persist();render()}
 function resetAll(){if(!confirm('TÜM veriler sıfırlansın mı?'))return;if(!confirm('Emin misin? Yedekler silinmez, ayrıca Geri düğmesiyle dönebilirsin.'))return;
  HS.U.push(cur);if(HS.U.length>20)HS.U.shift();HS.R=[];S=norm();cur=JSON.stringify(S);persist();render();schedNotif()}
@@ -906,7 +916,7 @@ function pwCard(){const P=S.pw;let h=`<div class="card"><h2 style="margin:0 0 6p
  else h+=`<div class="m" style="margin-bottom:4px">Her bölüm için Kilitle (içerik şifre ister) ve/veya Gizle (şifre girilene kadar hiç görünmez) seç. Uygulamayı kapatınca hepsi geri gelir.</div><div class="m" style="margin-top:6px"><b>Ana bölümler (altındaki tüm sayfalar)</b></div>`+NAV.filter(g=>g[0]!='ayr').map(g=>row(g[0],g[1])).join('')+`<div class="m" style="margin-top:8px"><b>Tek tek sayfalar</b></div>`+NAV.filter(g=>g[0]!='ayr').map(g=>g[2].map(x=>row('t_'+x[0],g[1]+' › '+x[1])).join('')).join('')+`<div class="m" style="margin-top:8px"><b>Ayarlar bölümleri</b></div>`+Object.keys(SECT).map(k=>row(k,SECT[k])).join('')+`<div style="margin-top:8px"><button class="g" onclick="pwLockNow()">Şimdi kilitle</button> <button class="g" onclick="$('pwch').hidden=!$('pwch').hidden">Şifreyi değiştir</button> <button class="g" onclick="pwRemove()">Şifreyi kaldır</button></div><div id="pwch" hidden style="margin-top:8px">${pwFields('Yeni şifreyi kaydet')}</div>`;
  return h+'</div>'}
 function empReset(){if(!confirm('Emeklilik bilgilerin (doğum, işe giriş, prim gün, SGK hesabı, şartlar) sıfırlanıp örnek değerlere dönsün mü? Önce Ayarlar → Yedekleme ile yedek almanı öneririm. Geri düğmesiyle de dönebilirsin.'))return;S.emp=JSON.parse(JSON.stringify(EMP0));save();render();toast('Emeklilik bilgileri sıfırlandı')}
-function render(){applyTheme();okTab();$('h').innerHTML=hdr();$('v').innerHTML=subnav()+indic()+(isLk(tab)?lockV(tab):V[tab]());
+function render(){applyTheme();okTab();$('h').innerHTML=hdr();$('v').innerHTML=subnav()+indic()+(isLk(tab)?lockV(tab):V[tab]());foldAll();
  $('n').innerHTML=NAV.filter(g=>!gHidden(g)).map(g=>`<button class="${g===gOf(tab)?'on':''}" onclick="goG('${g[0]}')">${isLkG(g[0])?LKI(UNL?1:0)+' ':''}${isHdG(g[0])?HDI():''}${g[1]}</button>`).join('');wkp();zhp();restD()}
 function go(t){tab=t;LASTG[gOf(t)[0]]=t;upSave();render();window.scrollTo(0,0)}
 function goG(id){const g=NAV.find(x=>x[0]==id),ok=t=>!isHd('t_'+t);go(LASTG[id]&&ok(LASTG[id])?LASTG[id]:(g[2].find(x=>ok(x[0]))||g[2][0])[0])}
