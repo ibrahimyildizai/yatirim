@@ -32,7 +32,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;t
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
 const APP_VER='3.19';
-var DEV_ALLOWED=true;
+var DEV_ALLOWED=false;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
 function upSave(){try{UP.tab=tab;UP.lg=LASTG;UP.open=UI.open;UP.m=UI.m;UP.st=UI.st;localStorage.setItem(KU,JSON.stringify(UP))}catch(e){}}
