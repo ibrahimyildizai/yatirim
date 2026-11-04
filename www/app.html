@@ -31,13 +31,37 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;t
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav><div id="pt" style="display:none;position:fixed;top:calc(64px + env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:9;color:#3ddc97;font-weight:700;pointer-events:none"></div>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='3.20';
+const APP_VER='3.21';
 var DEV_ALLOWED=true;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
 const nm=(id,d)=>{const v=(UP.nn||{})[id];return v?v:d},nmE=(id,d)=>esc(nm(id,d));
 function nmSet(id,v){v=String(v).replace(/\s+/g,' ').trim().slice(0,16);UP.nn=UP.nn||{};if(v)UP.nn[id]=v;else delete UP.nn[id];upSave();render()}
 function nmReset(){UP.nn={};upSave();render()}
+
+const KE='yt1e';
+const evCfg=()=>{try{return JSON.parse(localStorage.getItem(KE)||'{}')||{}}catch(e){return {}}};
+function evSet(f,v){const c=evCfg();c[f]=String(v).trim();try{localStorage.setItem(KE,JSON.stringify(c))}catch(e){}render()}
+async function evGet(url,key){const nh=NH(),ms=12000;
+ if(nh){const r=await nh.get({url:url,headers:{key:key},responseType:'text',connectTimeout:ms,readTimeout:ms});
+  if(!r||r.status<200||r.status>=300)throw new Error('HTTP '+(r&&r.status)+(r&&r.status==403?' (anahtar hatalı olabilir)':''));
+  return typeof r.data=='string'?r.data:JSON.stringify(r.data)}
+ const r=await fetch(url,{headers:{key:key}});if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}
+async function evUpd(){const st=$('evst'),c=evCfg();
+ const say=(t,er)=>{if(st){st.className='gst'+(er?' er':'');st.textContent=t;st.hidden=false}};
+ if(!c.k||!c.c){say('Önce EVDS anahtarını ve TÜFE seri kodunu yaz.',1);return}
+ const d=new Date(),p2=n=>String(n).padStart(2,'0'),a=new Date(d.getFullYear(),d.getMonth()-16,1);
+ const url='https://evds3.tcmb.gov.tr/igmevdsms-dis/series='+encodeURIComponent(c.c)+'&startDate='+p2(1)+'-'+p2(a.getMonth()+1)+'-'+a.getFullYear()+'&endDate='+p2(d.getDate())+'-'+p2(d.getMonth()+1)+'-'+d.getFullYear()+'&type=json';
+ say('Çekiliyor…');
+ try{const t=await evGet(url,c.k);let j;try{j=JSON.parse(t)}catch(e){throw new Error('Yanıt JSON değil (adres ya da anahtar sorunu)')}
+  const m={};(j.items||[]).forEach(it=>{const tr=String(it.Tarih||''),iso=/^\d{4}-/.test(tr),x=tr.match(/^(\d{4})-(\d{1,2})/)||tr.match(/^\d{1,2}-(\d{1,2})-(\d{4})/);if(!x)return;const y=iso?+x[1]:+x[2],mo=iso?+x[2]:+x[1];const vk=Object.keys(it).find(k=>k!='Tarih'&&k!='UNIXTIME'),v=parseFloat(it[vk]);if(v>0)m[y*12+mo-1]=v});
+  const ks=Object.keys(m).map(Number).sort((u,v)=>u-v);if(ks.length<2)throw new Error('Yeterli veri yok (seri kodu doğru mu?)');
+  const L=ks[ks.length-1],v0=m[L],v1=m[L-1],v12=m[L-12];if(!v1||!v12)throw new Error('Önceki ay/yıl verisi eksik');
+  const Y=Math.round((v0/v12-1)*10000)/100,A=Math.round((v0/v1-1)*10000)/100;
+  if(!(Y>-5&&Y<300&&A>-10&&A<30))throw new Error('Değerler mantıksız çıktı (yıllık '+Y+', aylık '+A+'); seri kodunu kontrol et');
+  const D=MON[L%12]+' '+Math.floor(L/12)+' (TÜİK, EVDS)';
+  if(confirm('Yıllık %'+String(Y).replace('.',',')+' · Aylık %'+String(A).replace('.',',')+'\n'+D+'\nUygulansın mı?')){S.ind.enfY=Y;S.ind.enfA=A;S.ind.enfD=D;save();render()}else say('Uygulanmadı.')
+ }catch(e){say('Güncellenemedi: '+(e&&e.message||e)+'. Elle girişi kullanabilirsin.',1)}}
 function upSave(){try{UP.tab=tab;UP.lg=LASTG;UP.open=UI.open;UP.m=UI.m;UP.st=UI.st;localStorage.setItem(KU,JSON.stringify(UP))}catch(e){}}
 const isB=x=>x.q>0&&!!x.k;
 const mat=x=>x.p==null&&!x.o&&x.e<today();
@@ -602,6 +626,7 @@ function asgCalc(){const o=$('ab');if(!o)return;const A=S.asg,lim=A.net*2/3;EVN=
 // ---------- KURLAR / GÖSTERGELER / YEDEK ----------
 const mk=(lbl,val,hd)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${hd};save();render()">`;
 const CHANGELOG=[
+{v:'3.21',d:'2026-11-04',t:['Göstergeler: Enflasyon TCMB EVDS\'den İnternetten güncelle düğmesiyle çekilebilir (kendi ücretsiz anahtarın ve TÜFE 2025=100 seri kodu gerekir). Yıllık ve aylık oran endeksten hesaplanır, önizleme onayından sonra uygulanır; hata olursa elle giriş kalır.','EVDS anahtarı yedeğe girmez.']},
 {v:'3.20',d:'2026-11-03',t:['Ayarlar\'da yeni Alt sekmeler bölümü: alt çubuktaki ve sayfa içi sekmelerin adları değiştirilebilir (en çok 16 karakter), Varsayılan adlara dön düğmesi var.','Alt çubukta uzun sekme adı 2 satıra bölünür.']},
 {v:'3.19',d:'2026-11-01',t:['Tüm kart başlıkları okla açılıp kapanır (▾/▸). Durum hatırlanır; yazdığın değerler kapatıp açınca silinmez.']},
 {v:'3.18',d:'2026-11-01',t:['Görünüm (Gider ile ortak): Siyah tema, Yuvarlak/Düz tasarım, Klasik ve Grafit renkleri eklendi; "Otomatik" adı "Sistemi takip et" oldu.','Görünüm kartı başlığında seçili ayarların özet satırı (ör. Koyu · Mavi · Yuvarlak); renk düğmelerinde renk noktası.']},
@@ -642,7 +667,7 @@ ${S.ka.on?`<div class="row"><div><label>Kur</label><select onchange="kurSet('k',
 <p class="m">Sadece sonuçlanmamış (aktif) fonlar için gönderilir. Telefon enerji tasarrufu bildirimi birkaç dakika geciktirebilir. Uygulama açıkken vadesi yaklaşan fonlar ana sayfanın üstünde de görünür.</p></div></div>
 <!--c:s_gun--><div class="card">${foldH('s_gun','<h2 style="margin:0">Güncelleme günlüğü</h2>',0,'Sürüm '+APP_VER+(DEV_ALLOWED?' · geliştirici':' · güvenli'))}<div ${isO('s_gun',0)?'':'hidden'} style="margin-top:10px">${CHANGELOG.map(c=>`<div style="margin-bottom:10px"><b>${c.v}</b> <span class="m">${c.d}</span><ul style="margin:4px 0 0 18px;padding:0">${c.t.map(x=>`<li class="m">${esc(x)}</li>`).join('')}</ul></div>`).join('')}<p class="m">Aynı liste GitHub'da CHANGELOG.md dosyasında da durur: <a href="https://github.com/ibrahimyildizai/yatirim/blob/main/CHANGELOG.md" target="_blank" rel="noopener">GitHub'da aç</a></p></div></div>
 <!--c:s_kay--><div class="card">${foldH('s_kay','<h2 style="margin:0">Kurlar nereden geliyor?</h2>',0)}<div ${isO('s_kay',0)?'':'hidden'} style="margin-top:10px"><p class="m">Fiziki altın alım-satımında baz alınan Harem Altın'ın resmî, herkese açık bir veri hizmeti yok; fiyatlar sitesinde canlı bağlantıyla akıyor. Bu yüzden uygulama sırayla dener:<br>1) <b>Harem Altın</b> (açık bir adres denenir)<br>2) <b>doviz.com'daki Harem fiyatı</b> (gram altın ve gümüş)<br>3) <b>Genelpara</b> (altın ve döviz alış/satış)<br>4) <b>Truncgil piyasa verisi</b> (Türkiye piyasası, gram altın ve döviz alış/satış; Harem'e yakındır ama birebir aynı olmayabilir)<br>5) <b>TCMB</b> (dolar ve euro, resmî kur)<br>6) <b>Uluslararası spot</b> (son çare; kuyumcu fiyatından farklıdır).<br>Hepsi aynı anda denenir (doğrudan bağlantı olmazsa genel bir aktarım hizmetiyle de denenir); her kur, sırayla ilk çalışan kaynaktan alınır. Hiçbiri çalışmazsa son değerler kalır ve aşağıda hangi kaynağın neden başarısız olduğu yazar.<br>Hangi kaynağın kullanıldığı üstte ve burada yazar. <b>Alış</b> = kuyumcunun senden aldığı, <b>satış</b> = senin aldığın fiyat. Geçmiş tarihli fiyatlar (alış tarihi, fon karşılaştırması) ve hesaplayıcıdaki değişim tahminleri uluslararası spot kaynaklıdır.</p>${rateLog()}</div></div>
-<!--c:s_gos--><div class="card">${foldH('s_gos','<h2 style="margin:0">Göstergeler</h2>',0,`Enflasyon %${f(I.enfY)} · ${I.enfD}`)}<div ${isO('s_gos',0)?'':'hidden'} style="margin-top:10px"><p class="m">Enflasyon ve açlık/yoksulluk sınırı internetten otomatik çekilemez. Yeni veri çıkınca buraya yaz ya da bana "güncelle" de.</p>`+
+<!--c:s_gos--><div class="card">${foldH('s_gos','<h2 style="margin:0">Göstergeler</h2>',0,`Enflasyon %${f(I.enfY)} · ${I.enfD}`)}<div ${isO('s_gos',0)?'':'hidden'} style="margin-top:10px"><p class="m">Enflasyon TCMB EVDS'den çekilebilir (ücretsiz anahtar gerekir). Açlık/yoksulluk sınırı elle girilir.</p><label>EVDS anahtarı</label><input type="password" autocomplete="off" placeholder="${evCfg().k?'kayıtlı (değiştirmek için yaz)':'evds3.tcmb.gov.tr → Profilim'}" onchange="evSet('k',this.value)"><label>TÜFE seri kodu (2025=100, Genel)</label><input value="${esc(evCfg().c||'')}" placeholder="EVDS'te serinin kodu" onchange="evSet('c',this.value)"><button class="g" onclick="evUpd()">İnternetten güncelle</button><div id="evst" class="gst" hidden></div><p class="m" style="font-size:12px">Anahtar yalnızca bu telefonda, yedeğin dışında saklanır.</p>`+
  mk('Yıllık enflasyon %',I.enfY,'S.ind.enfY=num(this.value)')+mk('Aylık enflasyon %',I.enfA,'S.ind.enfA=num(this.value)')+
  `<label>Enflasyon dönemi</label><input value="${I.enfD}" onchange="S.ind.enfD=this.value;save();render()">`+
  mk('Açlık sınırı (TL)',I.aclik,'S.ind.aclik=num(this.value)')+mk('Yoksulluk sınırı (TL)',I.yoks,'S.ind.yoks=num(this.value)')+
