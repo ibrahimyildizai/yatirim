@@ -1,5 +1,9 @@
 # Yatırım Takip – Güncelleme Günlüğü
 
+## 3.21 (2026-11-04)
+- Göstergeler: Enflasyon TCMB EVDS'den İnternetten güncelle düğmesiyle çekilebilir (kendi ücretsiz anahtarın ve TÜFE 2025=100 seri kodu gerekir). Yıllık ve aylık oran endeksten hesaplanır, önizleme onayından sonra uygulanır; hata olursa elle giriş kalır.
+- EVDS anahtarı yedeğe girmez.
+
 ## 3.20 (2026-11-03)
 - Ayarlar'da yeni Alt sekmeler bölümü: alt çubuktaki ve sayfa içi sekmelerin adları değiştirilebilir (en çok 16 karakter), Varsayılan adlara dön düğmesi var.
 - Alt çubukta uzun sekme adı 2 satıra bölünür.
