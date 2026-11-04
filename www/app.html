@@ -18,7 +18,7 @@ button.g{background:var(--b2);color:var(--t)}button.d{background:#6b2b2b}button:
 #h{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(8px + env(safe-area-inset-top)) 12px 4px}
 .bar{display:flex;gap:8px}.bar button{flex:1;margin:0;padding:9px 6px;font-size:14px}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--nv);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;border-radius:0;margin:0;padding:14px 0;min-width:0;font-size:clamp(12px,4.5vw,18px);white-space:nowrap;overflow:hidden;font-weight:700;color:var(--m);border-top:4px solid transparent}
+nav button{flex:1;background:none;border-radius:0;margin:0;padding:8px 2px;min-width:0;min-height:54px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;font-size:clamp(11px,4vw,16px);white-space:normal;overflow:hidden;overflow-wrap:anywhere;font-weight:700;color:var(--m);border-top:4px solid transparent}
 nav button.on{color:var(--b);border-top-color:var(--b)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 10px}.chips button{margin:0;padding:10px 16px;border-radius:var(--rp);font-size:16px;background:var(--b2);color:var(--t)}.chips button.on{background:var(--b);color:#fff}.fx{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}.fx.cl{margin-bottom:0!important}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:-1px}.chips button.on .dot{box-shadow:0 0 0 2px #fff}
 details{margin:4px 0}details details{margin-left:8px}summary{cursor:pointer;padding:10px 12px;background:var(--nv);border-radius:var(--ri);margin:6px 0;font-weight:700;list-style:none}summary::-webkit-details-marker{display:none}summary::before{content:'▸ ';color:var(--a)}details[open]>summary::before{content:'▾ '}
@@ -31,10 +31,13 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;t
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav><div id="pt" style="display:none;position:fixed;top:calc(64px + env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:9;color:#3ddc97;font-weight:700;pointer-events:none"></div>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='3.19';
-var DEV_ALLOWED=false;
+const APP_VER='3.20';
+var DEV_ALLOWED=true;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
+const nm=(id,d)=>{const v=(UP.nn||{})[id];return v?v:d},nmE=(id,d)=>esc(nm(id,d));
+function nmSet(id,v){v=String(v).replace(/\s+/g,' ').trim().slice(0,16);UP.nn=UP.nn||{};if(v)UP.nn[id]=v;else delete UP.nn[id];upSave();render()}
+function nmReset(){UP.nn={};upSave();render()}
 function upSave(){try{UP.tab=tab;UP.lg=LASTG;UP.open=UI.open;UP.m=UI.m;UP.st=UI.st;localStorage.setItem(KU,JSON.stringify(UP))}catch(e){}}
 const isB=x=>x.q>0&&!!x.k;
 const mat=x=>x.p==null&&!x.o&&x.e<today();
@@ -599,6 +602,7 @@ function asgCalc(){const o=$('ab');if(!o)return;const A=S.asg,lim=A.net*2/3;EVN=
 // ---------- KURLAR / GÖSTERGELER / YEDEK ----------
 const mk=(lbl,val,hd)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${hd};save();render()">`;
 const CHANGELOG=[
+{v:'3.20',d:'2026-11-03',t:['Ayarlar\'da yeni Alt sekmeler bölümü: alt çubuktaki ve sayfa içi sekmelerin adları değiştirilebilir (en çok 16 karakter), Varsayılan adlara dön düğmesi var.','Alt çubukta uzun sekme adı 2 satıra bölünür.']},
 {v:'3.19',d:'2026-11-01',t:['Tüm kart başlıkları okla açılıp kapanır (▾/▸). Durum hatırlanır; yazdığın değerler kapatıp açınca silinmez.']},
 {v:'3.18',d:'2026-11-01',t:['Görünüm (Gider ile ortak): Siyah tema, Yuvarlak/Düz tasarım, Klasik ve Grafit renkleri eklendi; "Otomatik" adı "Sistemi takip et" oldu.','Görünüm kartı başlığında seçili ayarların özet satırı (ör. Koyu · Mavi · Yuvarlak); renk düğmelerinde renk noktası.']},
 {v:'3.17',d:'2026-10-31',t:['Fon sekmesi: "Yeni fon kaydı" kartına aç/kapa oku eklendi.','Fon kayıtları iki gruba ayrıldı: Borsa fonları (kodlu, fiyatı çekilen) ve Proje tercihli fonlar (elle girilen). Her grubun kendi başlığı, sayısı ve toplamı var.','Zekât ekranına "Aktif fon kalemleri" listesi eklendi: toplamın hangi kayıtlardan oluştuğu görünür.','Vadesi geçmiş ve henüz sonuçlandırılmamış fonlar toplam varlığa, fon özetine ve borsa özetine katılmaz; kartında "Vadesi doldu" yazar.','Borsa fon / sertifika özeti yalnızca kodlu (DMLKT) kayıtları sayar; "Fon özeti" artık "Proje fon özeti": yalnızca elle girilen vadeli kayıtların getirisini hesaplar.']},
@@ -619,7 +623,7 @@ V.krl=()=>lockCards(krl0());
 const krl0=()=>{setTimeout(ntRefresh,0);if(anyLk()&&!UNL)setTimeout(()=>{const e=$('pwi');e&&e.focus()},80);if(FLIST===undefined&&FL()&&YF()){FLIST='yük';fLoad()}let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}const I=S.ind;
  let used=0;try{for(const k in localStorage)if(Object.prototype.hasOwnProperty.call(localStorage,k))used+=(k.length+String(localStorage[k]).length)*2}catch(e){}
  const o=!!localStorage.getItem('app_html'),p=!!localStorage.getItem('app_prev'),wv=(navigator.userAgent.match(/Chrome\/[\d.]+/)||['?'])[0];
- return `${devCards()}<!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0,thSum())}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['auto','Sistemi takip et'],['light','Açık'],['dark','Koyu'],['black','Siyah']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
+ return `${devCards()}<!--c:s_snm--><div class="card">${foldH('s_snm','<h2 style="margin:0">Alt sekmeler</h2>',0,Object.keys(UP.nn||{}).length?Object.keys(UP.nn).length+' ad değiştirildi':'Varsayılan adlar')}<div ${isO('s_snm',0)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Sekme adlarını değiştir (en çok 16 karakter; sığmazsa 2 satıra bölünür). Boş bırakırsan varsayılan ad döner.</p><div class="m"><b>Alt çubuk</b></div>${NAV.map(g=>`<label>${esc(g[1])}</label><input maxlength="16" placeholder="${esc(g[1])}" value="${esc((UP.nn||{})['g:'+g[0]]||'')}" onchange="nmSet('g:${g[0]}',this.value)">`).join('')}<div class="m" style="margin-top:10px"><b>Sayfa sekmeleri</b></div>${NAV.map(g=>g[2].length>1?g[2].map(x=>`<label>${esc(g[1])} › ${esc(x[1])}</label><input maxlength="16" placeholder="${esc(x[1])}" value="${esc((UP.nn||{})['t:'+x[0]]||'')}" onchange="nmSet('t:${x[0]}',this.value)">`).join(''):'').join('')}<button class="g" onclick="nmReset()">Varsayılan adlara dön</button></div></div><!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0,thSum())}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['auto','Sistemi takip et'],['light','Açık'],['dark','Koyu'],['black','Siyah']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
 <label>Renk</label><div class="chips">${Object.entries(ACC).map(a=>`<button class="${S.th.c==a[0]?'on':''}" onclick="setAcc('${a[0]}')"><i class="dot" style="background:${a[1][1]}"></i>${a[1][0]}</button>`).join('')}</div>
 <label>Tasarım</label><div class="chips">${[['round','Yuvarlak'],['flat','Düz']].map(t=>`<button class="${(S.th.s=='flat'?'flat':'round')==t[0]?'on':''}" onclick="setShape('${t[0]}')">${t[1]}</button>`).join('')}</div></div></div>
 <!--c:s_kur--><div class="card">${foldH('s_kur','<h2 style="margin:0">Kurlar (TL)</h2>',0,`Son: ${S.rates.t||'-'} · ${srcText(S.rates.src)}`)}<div ${isO('s_kur',0)?'':'hidden'} style="margin-top:10px"><p class="m">Son güncelleme: ${S.rates.t||'-'}<br>Kaynak: <b>${srcText(S.rates.src)}</b><br>Gram altın: alış ${f(S.rates.gold)} · satış ${f(S.rates.goldS||S.rates.gold)} TL<br>Aşağıdaki kutular <b>alış</b> fiyatıdır (kuyumcunun senden aldığı); portföy değeri bununla hesaplanır. Elle düzeltebilirsin.</p>`+
@@ -838,7 +842,7 @@ function resetAll(){if(!confirm('TÜM veriler sıfırlansın mı?'))return;if(!c
 const NAV=[['por','Portföy',[['fon','Fon'],['ast','Varlık']]],['pln','Planla',[['hed','Hedefler'],['calc','Hesapla'],['zek','Zekât']]],['bil','Bilgi',[['bil','Genel'],['asg','Asgari ücret']]],['emg','Emeklilik',[['emk','Özet'],['emy','Ne zaman?'],['emm','Maaş'],['emv','Güncelle']]],['ayr','Ayarlar',[['krl','Ayarlar']]]];
 const gOf=t=>NAV.find(g=>g[2].some(s=>s[0]==t))||NAV[0];
 const LASTG=Object.assign({},UP.lg||{});let tab=(UP.tab&&NAV.some(g=>g[2].some(x=>x[0]==UP.tab)))?UP.tab:'fon';
-function subnav(){const g=gOf(tab),vs=g[2].filter(x=>!isHd('t_'+x[0]));if(vs.length<2)return '';return `<div class="chips">`+vs.map(s=>`<button class="${s[0]==tab?'on':''}" onclick="go('${s[0]}')">${isLkG('t_'+s[0])?LKI(UNL?1:0)+' ':''}${isHdG('t_'+s[0])?HDI():''}${s[1]}</button>`).join('')+`</div>`}
+function subnav(){const g=gOf(tab),vs=g[2].filter(x=>!isHd('t_'+x[0]));if(vs.length<2)return '';return `<div class="chips">`+vs.map(s=>`<button class="${s[0]==tab?'on':''}" onclick="go('${s[0]}')">${isLkG('t_'+s[0])?LKI(UNL?1:0)+' ':''}${isHdG('t_'+s[0])?HDI():''}${nmE('t:'+s[0],s[1])}</button>`).join('')+`</div>`}
 function hdr(){return `<div class="bar"><button class="g" onclick="undo()" ${HS.U.length?'':'disabled'}>◀ Geri (${HS.U.length})</button><button class="g" onclick="redo()" ${HS.R.length?'':'disabled'}>İleri (${HS.R.length}) ▶</button></div>
 <div class="m" style="padding:5px 2px 0">${busy?'<b class="up" style="font-size:14px">Güncelleniyor…</b>':'Kurlar: '+(S.rates.t||'alınamadı')+' · '+srcText(S.rates.src)}${err&&!busy?' · alınamadı, son değerler (ayrıntı: Ayarlar → Kurlar nereden geliyor?)':''}<br>Aşağı çekerek güncelle</div>`}const OFF=[[0,'Vade günü'],[1,'1 gün önce'],[3,'3 gün önce'],[7,'7 gün önce']];
 const LN=()=>{try{return window.Capacitor&&Capacitor.isPluginAvailable&&Capacitor.isPluginAvailable('LocalNotifications')?Capacitor.Plugins.LocalNotifications:null}catch(e){return null}};
@@ -893,14 +897,14 @@ function okTab(){if(!isHdT(tab))return;const g=gOf(tab);let t=g[2].find(x=>!isHd
 const HDI=()=>`<svg width="11" height="11" viewBox="0 0 24 24" style="vertical-align:-1px;opacity:.6;margin-right:3px" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>`;
 function pwHid(g,c){S.pw.hid[g]=c;save(true);render()}
 function lockV(t){setTimeout(()=>{const e=$('pwi');e&&e.focus()},80);
- return `<div class="card" style="text-align:center"><div style="font-size:16px;margin-bottom:6px">${LKI(0,16)} <b>${gOf(t)[1]}${gOf(t)[2].length>1?' › '+gOf(t)[2].find(x=>x[0]==t)[1]:''} kilitli</b></div><div class="m" style="margin-bottom:8px">Şifreyi girince açılır. Uygulamayı kapatınca tekrar kilitlenir.</div><input id="pwi" type="password" autocomplete="off" placeholder="Şifre" onkeydown="if(event.key=='Enter')pwOpen()"><button onclick="pwOpen()" style="margin-top:8px">Aç</button></div>`}
+ return `<div class="card" style="text-align:center"><div style="font-size:16px;margin-bottom:6px">${LKI(0,16)} <b>${nmE('g:'+gOf(t)[0],gOf(t)[1])}${gOf(t)[2].length>1?' › '+nmE('t:'+t,gOf(t)[2].find(x=>x[0]==t)[1]):''} kilitli</b></div><div class="m" style="margin-bottom:8px">Şifreyi girince açılır. Uygulamayı kapatınca tekrar kilitlenir.</div><input id="pwi" type="password" autocomplete="off" placeholder="Şifre" onkeydown="if(event.key=='Enter')pwOpen()"><button onclick="pwOpen()" style="margin-top:8px">Aç</button></div>`}
 function pwOpen(){const e=$('pwi');if(!e)return;if(pwH(e.value,S.pw.s)===S.pw.h){UNL=true;toast('Kilit açıldı');render()}else{e.value='';toast('Şifre yanlış')}}
 function pwSet(){const a=$('pw1').value,b=$('pw2').value;if(a.length<4)return toast('En az 4 karakter gir');if(a!==b)return toast('İki şifre aynı değil');const sl=Math.random().toString(36).slice(2)+Date.now().toString(36);S.pw.s=sl;S.pw.h=pwH(a,sl);UNL=true;save(true);render();toast('Şifre kaydedildi')}
 function pwTog(g,c){S.pw.sec[g]=c;save(true);render()}
 function pwLockNow(){UNL=false;render();toast('Kilitlendi')}
 function pwRemove(){if(!confirm('Şifre kaldırılsın mı? Tüm kilitler kalkar.'))return;S.pw={h:'',s:'',sec:{},hid:{}};UNL=false;save(true);render()}
 const pwFields=b=>`<input id="pw1" type="password" autocomplete="new-password" placeholder="Yeni şifre (en az 4 karakter)"><input id="pw2" type="password" autocomplete="new-password" placeholder="Şifreyi tekrar yaz" style="margin-top:6px"><button onclick="pwSet()" style="margin-top:8px">${b}</button>`;
-const SECT={s_gor:'Görünüm',s_kur:'Kurlar (TL)',s_bil:'Bildirimler',s_gun:'Güncelleme günlüğü',s_kay:'Kurlar nereden geliyor?',s_gos:'Göstergeler',s_yed:'Yedekleme',s_upd:'Uygulama güncelleme',s_ver:'Veri',s_hak:'Hakkında'};
+const SECT={s_snm:'Alt sekmeler',s_gor:'Görünüm',s_kur:'Kurlar (TL)',s_bil:'Bildirimler',s_gun:'Güncelleme günlüğü',s_kay:'Kurlar nereden geliyor?',s_gos:'Göstergeler',s_yed:'Yedekleme',s_upd:'Uygulama güncelleme',s_ver:'Veri',s_hak:'Hakkında'};
 if(DEV_ALLOWED)Object.assign(SECT,{s_git:'GitHub bağlantısı',s_dev:'Geliştirmeyi bitir'});else delete SECT.s_upd;
 const anyLk=()=>!!(S.pw&&S.pw.h&&Object.values(S.pw.sec).some(Boolean));
 function pwFocus(){const e=$('pwi');if(e){e.scrollIntoView({block:'center'});e.focus()}}
@@ -917,7 +921,7 @@ function pwCard(){const P=S.pw;let h=`<div class="card"><h2 style="margin:0 0 6p
  return h+'</div>'}
 function empReset(){if(!confirm('Emeklilik bilgilerin (doğum, işe giriş, prim gün, SGK hesabı, şartlar) sıfırlanıp örnek değerlere dönsün mü? Önce Ayarlar → Yedekleme ile yedek almanı öneririm. Geri düğmesiyle de dönebilirsin.'))return;S.emp=JSON.parse(JSON.stringify(EMP0));save();render();toast('Emeklilik bilgileri sıfırlandı')}
 function render(){applyTheme();okTab();$('h').innerHTML=hdr();$('v').innerHTML=subnav()+indic()+(isLk(tab)?lockV(tab):V[tab]());foldAll();
- $('n').innerHTML=NAV.filter(g=>!gHidden(g)).map(g=>`<button class="${g===gOf(tab)?'on':''}" onclick="goG('${g[0]}')">${isLkG(g[0])?LKI(UNL?1:0)+' ':''}${isHdG(g[0])?HDI():''}${g[1]}</button>`).join('');wkp();zhp();restD()}
+ $('n').innerHTML=NAV.filter(g=>!gHidden(g)).map(g=>`<button class="${g===gOf(tab)?'on':''}" onclick="goG('${g[0]}')"><span>${isLkG(g[0])?LKI(UNL?1:0)+' ':''}${isHdG(g[0])?HDI():''}${nmE('g:'+g[0],g[1])}</span></button>`).join('');wkp();zhp();restD()}
 function go(t){tab=t;LASTG[gOf(t)[0]]=t;upSave();render();window.scrollTo(0,0)}
 function goG(id){const g=NAV.find(x=>x[0]==id),ok=t=>!isHd('t_'+t);go(LASTG[id]&&ok(LASTG[id])?LASTG[id]:(g[2].find(x=>ok(x[0]))||g[2][0])[0])}
 document.addEventListener('visibilitychange',()=>{if(document.hidden){save(true);persist()}else{backup();if(!S.rates.ts||Date.now()-S.rates.ts>3e5)refresh(true)}});
