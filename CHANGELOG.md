@@ -1,5 +1,9 @@
 # Yatırım Takip – Güncelleme Günlüğü
 
+## 3.20 (2026-11-03)
+- Ayarlar'da yeni Alt sekmeler bölümü: alt çubuktaki ve sayfa içi sekmelerin adları değiştirilebilir (en çok 16 karakter), Varsayılan adlara dön düğmesi var.
+- Alt çubukta uzun sekme adı 2 satıra bölünür.
+
 ## 3.19 (2026-11-01)
 - Tüm kart başlıkları okla açılıp kapanır (▾/▸). Durum hatırlanır; yazdığın değerler kapatıp açınca silinmez.
 
