@@ -1,5 +1,12 @@
 # Yatırım Takip – Güncelleme Günlüğü
 
+## 3.22 (2026-11-06)
+- Aşağı çekip yenileme artık kurlar, borsa fiyatları ve göstergeleri (enflasyon, en düşük/en yüksek emekli aylığı) birlikte günceller.
+- Borsa fon / sertifika özeti: kâr yalnızca fiyatı alınan kayıtlardan hesaplanır, kayıt başına kâr ve vade tarihi, fiyatı alınamayanların nedeni gösterilir.
+- Emeklilik › Bilgilerim: kişiye özel aylık bağlama oranı (ABO) kartı: SGK hesabındaki oran, bugünkü ve emekli olduğundaki tahmini ABO.
+- Emeklilik › Maaş: en düşük ve en yüksek emekli aylığı arasında yüzdelik konum.
+- Günlük kayıtlardan Değişim istatistiği: kur, altın, emekli aylığın, en düşük emekli aylığı ve enflasyonun eski ve şimdiki değeri.
+
 ## 3.21 (2026-11-04)
 - Göstergeler: Enflasyon TCMB EVDS'den İnternetten güncelle düğmesiyle çekilebilir (kendi ücretsiz anahtarın ve TÜFE 2025=100 seri kodu gerekir). Yıllık ve aylık oran endeksten hesaplanır, önizleme onayından sonra uygulanır; hata olursa elle giriş kalır.
 - EVDS anahtarı yedeğe girmez.
