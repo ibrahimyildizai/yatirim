@@ -31,7 +31,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;t
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav><div id="pt" style="display:none;position:fixed;top:calc(64px + env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:9;color:#3ddc97;font-weight:700;pointer-events:none"></div>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='3.21';
+const APP_VER='3.22';
 var DEV_ALLOWED=true;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
@@ -47,21 +47,46 @@ async function evGet(url,key){const nh=NH(),ms=12000;
   if(!r||r.status<200||r.status>=300)throw new Error('HTTP '+(r&&r.status)+(r&&r.status==403?' (anahtar hatalı olabilir)':''));
   return typeof r.data=='string'?r.data:JSON.stringify(r.data)}
  const r=await fetch(url,{headers:{key:key}});if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}
+async function evCalc(c){
+ const d=new Date(),p2=n=>String(n).padStart(2,'0'),a=new Date(d.getFullYear(),d.getMonth()-16,1);
+ const url='https://evds3.tcmb.gov.tr/igmevdsms-dis/series='+encodeURIComponent(c.c)+'&startDate=01-'+p2(a.getMonth()+1)+'-'+a.getFullYear()+'&endDate='+p2(d.getDate())+'-'+p2(d.getMonth()+1)+'-'+d.getFullYear()+'&type=json';
+ const t=await evGet(url,c.k);let j;try{j=JSON.parse(t)}catch(e){throw new Error('Yanıt JSON değil (adres ya da anahtar sorunu)')}
+ const m={};(j.items||[]).forEach(it=>{const tr=String(it.Tarih||''),iso=/^\d{4}-/.test(tr),x=tr.match(/^(\d{4})-(\d{1,2})/)||tr.match(/^\d{1,2}-(\d{1,2})-(\d{4})/);if(!x)return;const y=iso?+x[1]:+x[2],mo=iso?+x[2]:+x[1];const vk=Object.keys(it).find(k=>k!='Tarih'&&k!='UNIXTIME'),v=parseFloat(it[vk]);if(v>0)m[y*12+mo-1]=v});
+ const ks=Object.keys(m).map(Number).sort((u,v)=>u-v);if(ks.length<2)throw new Error('Yeterli veri yok (seri kodu doğru mu?)');
+ const L=ks[ks.length-1],v0=m[L],v1=m[L-1],v12=m[L-12];if(!v1||!v12)throw new Error('Önceki ay/yıl verisi eksik');
+ const Y=Math.round((v0/v12-1)*10000)/100,A=Math.round((v0/v1-1)*10000)/100;
+ if(!(Y>-5&&Y<300&&A>-10&&A<30))throw new Error('Değerler mantıksız çıktı (yıllık '+Y+', aylık '+A+'); seri kodunu kontrol et');
+ return{Y:Y,A:A,D:MON[L%12]+' '+Math.floor(L/12)+' (TÜİK, EVDS)'}}
 async function evUpd(){const st=$('evst'),c=evCfg();
  const say=(t,er)=>{if(st){st.className='gst'+(er?' er':'');st.textContent=t;st.hidden=false}};
  if(!c.k||!c.c){say('Önce EVDS anahtarını ve TÜFE seri kodunu yaz.',1);return}
- const d=new Date(),p2=n=>String(n).padStart(2,'0'),a=new Date(d.getFullYear(),d.getMonth()-16,1);
- const url='https://evds3.tcmb.gov.tr/igmevdsms-dis/series='+encodeURIComponent(c.c)+'&startDate='+p2(1)+'-'+p2(a.getMonth()+1)+'-'+a.getFullYear()+'&endDate='+p2(d.getDate())+'-'+p2(d.getMonth()+1)+'-'+d.getFullYear()+'&type=json';
  say('Çekiliyor…');
- try{const t=await evGet(url,c.k);let j;try{j=JSON.parse(t)}catch(e){throw new Error('Yanıt JSON değil (adres ya da anahtar sorunu)')}
-  const m={};(j.items||[]).forEach(it=>{const tr=String(it.Tarih||''),iso=/^\d{4}-/.test(tr),x=tr.match(/^(\d{4})-(\d{1,2})/)||tr.match(/^\d{1,2}-(\d{1,2})-(\d{4})/);if(!x)return;const y=iso?+x[1]:+x[2],mo=iso?+x[2]:+x[1];const vk=Object.keys(it).find(k=>k!='Tarih'&&k!='UNIXTIME'),v=parseFloat(it[vk]);if(v>0)m[y*12+mo-1]=v});
-  const ks=Object.keys(m).map(Number).sort((u,v)=>u-v);if(ks.length<2)throw new Error('Yeterli veri yok (seri kodu doğru mu?)');
-  const L=ks[ks.length-1],v0=m[L],v1=m[L-1],v12=m[L-12];if(!v1||!v12)throw new Error('Önceki ay/yıl verisi eksik');
-  const Y=Math.round((v0/v12-1)*10000)/100,A=Math.round((v0/v1-1)*10000)/100;
-  if(!(Y>-5&&Y<300&&A>-10&&A<30))throw new Error('Değerler mantıksız çıktı (yıllık '+Y+', aylık '+A+'); seri kodunu kontrol et');
-  const D=MON[L%12]+' '+Math.floor(L/12)+' (TÜİK, EVDS)';
-  if(confirm('Yıllık %'+String(Y).replace('.',',')+' · Aylık %'+String(A).replace('.',',')+'\n'+D+'\nUygulansın mı?')){S.ind.enfY=Y;S.ind.enfA=A;S.ind.enfD=D;save();render()}else say('Uygulanmadı.')
+ try{const r=await evCalc(c);
+  if(confirm('Yıllık %'+String(r.Y).replace('.',',')+' · Aylık %'+String(r.A).replace('.',',')+'\n'+r.D+'\nUygulansın mı?')){S.ind.enfY=r.Y;S.ind.enfA=r.A;S.ind.enfD=r.D;save();render()}else say('Uygulanmadı.')
  }catch(e){say('Güncellenemedi: '+(e&&e.message||e)+'. Elle girişi kullanabilirsin.',1)}}
+const EMIN0=23552,EMAX0=90000;
+const emMin=()=>+S.ind.emMin>0?+S.ind.emMin:EMIN0,emMax=()=>+S.ind.emMax>0?+S.ind.emMax:EMAX0;
+const VERI_URL='https://raw.githubusercontent.com/ibrahimyildizai/yatirim/main/veri.json';
+async function refInd(){let ch=0;const I=S.ind;
+ try{const j=JSON.parse(await hget(VERI_URL+'?_='+Date.now(),8000));
+  if(j&&j.d&&String(j.d)>String(I.vd||'')){const nv=(k,lo,hi)=>{const v=+j[k];if(v>lo&&v<hi){I[k]=v;ch++}},ns=k=>{if(typeof j[k]=='string'&&j[k]){I[k]=j[k]}};
+   nv('enfY',-5,300);nv('enfA',-10,30);ns('enfD');nv('aclik',1e3,1e6);nv('yoks',1e3,1e7);ns('aclikD');nv('emMin',1e3,1e6);nv('emMax',1e3,1e7);ns('emD');I.vd=String(j.d)}}catch(e){}
+ try{const c=evCfg();if(c.k&&c.c){const r=await evCalc(c);if(r.Y!=I.enfY||r.A!=I.enfA){I.enfY=r.Y;I.enfA=r.A;I.enfD=r.D;ch++}}}catch(e){}
+ I.ut=nowS();if(ch)save(true);return ch}
+function empAmt(){const E=S.emp,P=E.pay,c=empCalc(),b=c.best,t=pdt(today()),o=P.ort>0?P.aylik/P.ort*100:0,yrs=b?Math.max(0,(b.ready-t)/864e5/365.25):0,up=E.work?(+P.raise||0)*yrs:0,fac=o>0?(o+up)/o*Math.pow(1+(+P.real||0)/100,yrs):1,base=P.aylik+(+P.ek||0);return{base:base,reel:base*fac,b:b,yrs:yrs}}
+function aboCard(){const E=S.emp,P=E.pay,a=empAmt(),o=P.ort>0&&P.aylik>0?P.aylik/P.ort*100:0,up=E.work?(+P.raise||0)*a.yrs:0,has=(+P.o2>0||+P.o3>0)||o>0;
+ if(!has)return `<div class="card"><h2>Aylık bağlama oranım (ABO)</h2><p class="m" style="margin:0">SGK aylık hesabı girilmemiş. Güncelle bölümündeki SGK aylık hesabına ortalama kazanç, aylık ve bağlama oranlarını yaz; ABO kişiye özel buradan hesaplanır.</p></div>`;
+ return `<div class="card"><h2>Aylık bağlama oranım (ABO)</h2><div class="m">SGK hesabı · ${dmy(P.d)} tarihli</div><table>${+P.o2>0||+P.o3>0?`<tr><td>SGK'daki oran (2 / 3)</td><td>${f(P.o2)} / ${f(P.o3)}</td></tr>`:''}${o>0?`<tr><td><b>Bugünkü ABO</b> (aylık ÷ ort. kazanç)</td><td><b>%${f(o)}</b></td></tr>`:''}${o>0&&a.b?`<tr><td>Emekli olduğunda tahmini</td><td>%${f(o+up)}</td></tr>`:''}</table><p class="m">ABO, ortalama kazancının yüzde kaçının aylık olarak bağlandığını gösterir. Emekli olana kadar çalışırsan oran artar (yıllık +${f(P.raise)} puan varsayımıyla tahmin). Kaba tahmindir, SGK hesabı değildir.</p></div>`}
+function recStat(){try{const a=empAmt(),r=S.rates,d=today();if(!(r.usd>0))return;S.stat=(S.stat||[]).filter(x=>x.d!=d);S.stat.push({d:d,usd:r.usd,eur:r.eur,gold:r.gold,pb:a.base,pr:a.reel,mn:emMin(),mx:emMax(),ey:+S.ind.enfY});S.stat.sort((x,y)=>x.d>y.d?1:-1);if(S.stat.length>800)S.stat=S.stat.slice(-800);save(true)}catch(e){}}
+function emPosCard(base,reel){const mn=emMin(),mx=emMax(),I=S.ind;
+ const row=(l,v)=>{const p=(v-mn)/(mx-mn)*100,w=Math.max(0,Math.min(100,p));return `<div style="margin:10px 0"><div>${l}: <b>${f(v,0)} TL</b></div><div style="background:var(--nv);border-radius:8px;height:12px;margin:6px 0;overflow:hidden"><div style="width:${w}%;height:100%;background:var(--a)"></div></div><div>${v<mn?'<span class="dn">En düşük aylığın altında</span> (tamamlama ile en az '+f(mn,0)+' TL ödenir)':v>mx?'<b>En yüksek sınırın üstünde</b>':'<b>%'+f(p,1)+'</b> konumunda'}</div></div>`};
+ return `<div class="card"><h2>Emekli aylığı konumun</h2><div class="m">En düşük ${f(mn,0)} TL ↔ En yüksek ${f(mx,0)} TL${I.emD?' · '+esc(I.emD):''}</div>${row('Bugün emekli olsaydın',base)}${row('Emekli olduğunda (bugünkü alım gücüyle)',reel)}<p class="m">En düşük aylık resmî rakamdır. En yüksek için resmî tavan yoktur, tahmini bir üst sınırdır; Ayarlar → Göstergeler'den değiştirebilirsin.</p></div>`}
+function statCard(){const L=S.stat||[];const h=t=>`<div class="card"><h2>Değişim istatistiği</h2>${t}</div>`;
+ if(L.length<2)return h('<p class="m" style="margin:0">Her güncellemede kurlar, emekli aylığın ve göstergeler günlük kaydedilir. Karşılaştırma için en az 2 farklı günün kaydı gerekir.</p>');
+ const n=L[L.length-1],tg=Date.parse(n.d)-30*864e5;let o=L[0];for(const x of L){if(Date.parse(x.d)<=tg)o=x}
+ if(o.d==n.d)o=L[0];const nn=n,r=(l,a,b,d,u)=>a>0&&b>0?`<div style="margin:6px 0"><b>${l}</b><br><span class="m">${dmy(o.d)}:</span> ${f(a,d)} ${u} → <span class="m">şimdi:</span> ${f(b,d)} ${u} ${pc((b/a-1)*100)}</div>`:'';
+ const a=empAmt();
+ return h(`<div class="m">Karşılaştırma: ${dmy(o.d)} → ${dmy(nn.d)} (${L.length} kayıt)</div>`+r('Dolar',o.usd,nn.usd,2,'TL')+r('Euro',o.eur,nn.eur,2,'TL')+r('Gram altın',o.gold,nn.gold,2,'TL')+r('Emekli aylığın (bugün)',o.pb,nn.pb,0,'TL')+r('Emekli olduğunda tahmini',o.pr,nn.pr,0,'TL')+r('En düşük emekli aylığı',o.mn,nn.mn,0,'TL')+r('Yıllık enflasyon',o.ey,nn.ey,2,'%'))}
 function upSave(){try{UP.tab=tab;UP.lg=LASTG;UP.open=UI.open;UP.m=UI.m;UP.st=UI.st;localStorage.setItem(KU,JSON.stringify(UP))}catch(e){}}
 const isB=x=>x.q>0&&!!x.k;
 const mat=x=>x.p==null&&!x.o&&x.e<today();
@@ -173,7 +198,9 @@ function autoSnap(r){const d=today();S.snaps=S.snaps.filter(s=>s.d!=d);S.snaps.p
 async function refresh(auto){if(busy)return;if(auto&&S.lock&&S.rates.usd)return;busy=true;err=false;render();
  try{const r=await fetchLive(),o=S.rates;S.rates=Object.assign({},o,r,{src:Object.assign({},o.src,r.src),t:nowS(),ts:Date.now()});autoSnap(S.rates);save(true);rtry=0;await loadPast();try{kurCheck()}catch(x){}}catch(e){err=true}
  try{await refQ()}catch(e){}
- busy=false;render();if(err&&auto&&rtry<2){rtry++;setTimeout(()=>refresh(true),8000)}if(!auto)toast(err?'Kurlar alınamadı. Ayrıntı: Ayarlar → Kurlar nereden geliyor?':'Kurlar güncellendi ✓')}
+ try{await refInd()}catch(e){}
+ try{recStat()}catch(e){}
+ busy=false;render();if(err&&auto&&rtry<2){rtry++;setTimeout(()=>refresh(true),8000)}if(!auto)toast(err?'Kurlar alınamadı. Ayrıntı: Ayarlar → Kurlar nereden geliyor?':'Kurlar, fiyatlar, göstergeler güncellendi ✓')}
 
 function wk(s){if(!s)return '-';const p=s.split('-').map(Number),d=new Date(Date.UTC(p[0],p[1]-1,p[2]));const dn=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-dn+3);
  const y=d.getUTCFullYear(),j=new Date(Date.UTC(y,0,4)),w=1+Math.round(((d-j)/864e5-3+((j.getUTCDay()+6)%7))/7);return w+'. hafta'+(y!=p[0]?' ('+y+')':'')}
@@ -291,9 +318,17 @@ async function refQ(){const ks=[...new Set(S.funds.filter(x=>x.k&&x.p==null).map
 async function qNow(silent){if(!silent)toast('Fiyat alınıyor…');try{const n=await refQ();render();if(!silent)toast(n?'Fiyat güncellendi ✓':'Fiyat alınamadı')}catch(e){if(!silent)toast('Fiyat alınamadı')}}
 function fsum(){const A=S.funds.filter(x=>x.p==null&&!mat(x)),P=A.filter(x=>x.q>0&&qp(x)>0),pl=P.reduce((s,x)=>s+qp(x)*x.q-x.a,0);return A.length+' aktif'+(S.funds.some(mat)?' · '+S.funds.filter(mat).length+' vadesi doldu':'')+(P.length?` · ${pl>=0?'kâr':'zarar'} ${f(Math.abs(pl))} TL`:'')}
 function qStamp(P){const Z=P.map(x=>(S.q||{})[qn(x.k)]).filter(q=>q&&q.ts);if(!Z.length)return '';const o=Z.reduce((a,b)=>b.ts<a.ts?b:a);return `<p class="m">Fiyatlar en son: ${esc(o.t)}</p>`}
-function posCard(){const P=S.funds.filter(x=>x.p==null&&!mat(x)&&isB(x));if(!P.length)return '';let cost=0,val=0,miss=0;
- P.forEach(x=>{cost+=x.a;const pr=qp(x);if(pr>0)val+=pr*x.q;else{val+=x.a;miss++}});const pl=val-cost;
- return `<div class="card"><h2>Borsa fon / sertifika özeti</h2>Toplam maliyet: <b>${f(cost)} TL</b><br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(cost?pl/cost*100:0)}`+(miss?`<p class="m">${miss} kayıtta anlık fiyat alınamadı; o kayıtlar maliyetle sayıldı.</p>`:'')+qStamp(P)+`<button class="g" onclick="qNow()">Fiyatları güncelle</button></div>`}
+function posCard(){const P=S.funds.filter(x=>x.p==null&&!mat(x)&&isB(x));if(!P.length)return '';let cost=0,val=0,mc=0;const ok=[],miss=[];
+ P.forEach(x=>{const pr=qp(x),a=+x.a||0;if(pr>0&&x.q>0){cost+=a;val+=pr*x.q;ok.push(x)}else{mc+=a;miss.push(x)}});
+ const pl=val-cost,td=day(today()),vd=x=>x.o?'açık vade':(x.e?dmy(x.e)+' ('+Math.round((day(x.e)-td)/864e5)+' gün)':'-');
+ const nx=P.filter(x=>!x.o&&x.e).sort((a,b)=>a.e>b.e?1:-1)[0];
+ let h=`<div class="card"><h2>Borsa fon / sertifika özeti</h2>`;
+ if(ok.length)h+=`Toplam maliyet: <b>${f(cost)} TL</b><br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(cost?pl/cost*100:0)}`;
+ else h+=`<div class="dn">Kâr hesaplanamadı: hiçbir kayıtta anlık fiyat alınamadı.</div>`;
+ if(nx)h+=`<br>En yakın vade: <b>${dmy(nx.e)}</b> (${Math.round((day(nx.e)-td)/864e5)} gün)`;
+ h+=`<div style="margin-top:8px">`+P.map(x=>{const pr=qp(x),r=pr>0&&x.q>0?x.q*pr-(+x.a||0):null;return `<div class="m" style="margin:3px 0">${esc(x.k||x.n||'-')} · ${r==null?'fiyat yok':`<span class="${r>=0?'up':'dn'}">${r>=0?'+':'−'}${f(Math.abs(r))} TL</span>`} · Vade: ${vd(x)}</div>`}).join('')+`</div>`;
+ if(miss.length)h+=`<p class="m">Fiyatı alınamayan ${miss.length} kayıt (maliyet ${f(mc)} TL) kâra katılmadı: `+miss.map(x=>esc(qn(x.k)||'-')+(QE[qn(x.k)]?' ('+esc(String(QE[qn(x.k)]).slice(0,80))+')':'')).join('; ')+`</p>`;
+ return h+qStamp(P)+`<button class="g" onclick="qNow()">Fiyatları güncelle</button></div>`}
 
 // ---------- EVDE BAKIM UYGUNLUK (Hesapla) ----------
 var EVN='4',EVG='';
@@ -530,7 +565,7 @@ V.emk=()=>{const E=S.emp,c=empCalc(),b=c.best,t=pdt(today());
  let h=stale()+`<div class="card"><h2>Emeklilik bilgilerim</h2><div class="m">Bugün: ${dmy(today())} · ${wk(today())}</div>
 <div style="margin:8px 0"><div class="m">Prim ödeme gün sayısı (bugün, tahmini)</div><b style="font-size:30px;color:var(--a)">${f(c.prim,0)}</b><div class="m">SGK'da ${f(E.prim,0)} gün (${dmy(E.primD)})${E.work?` · her ay +${f(E.rate,0)} gün varsayılıyor`:' · çalışmıyor, artış yok'}</div></div>
 <table><tr><td>Hizmete başlama tarihi</td><td>${dmy(E.start)}</td></tr><tr><td>4A tescil başlangıç</td><td>${dmy(E.tescil)}</td></tr><tr><td>Yaşınız</td><td>${ylab(c.age)}</td></tr><tr><td>Sigortalılık süresi</td><td>${ylab(c.sig)}</td></tr></table></div>
-<div class="card"><h2>Emekliliğe kalan</h2>`;
+`+aboCard()+`<div class="card"><h2>Emekliliğe kalan</h2>`;
  if(b){const done=b.ready<=t;h+=done?`<div class="ok">Emeklilik şartları tamamlanmış görünüyor.</div>`:`<div class="ok">${gf(b.ready)}</div><div style="margin-top:4px">${ylab(ymd(c.tom,b.ready))} sonra</div><div class="m">Belirleyici şart: ${b.why}</div>`;
   h+=`<button class="g" onclick="go('emy')" style="margin-top:8px">Ayrıntılar</button><button class="g" onclick="go('emm')">Maaş tahmini</button>`}
  else h+=`<div class="dn">Çalışmaya devam etmeden bu şartlar tamamlanamaz.</div>`;
@@ -549,7 +584,7 @@ V.emm=()=>{const E=S.emp,P=E.pay,c=empCalc(),b=c.best,Q=S.rates,A=S.asg,I=S.ind,
   fac=o>0?(o+up)/o*Math.pow(1+(+P.real||0)/100,yrs):1,base=P.aylik+(+P.ek||0),reel=base*fac,nom=reel*Math.pow(1+(+P.grow||0)/100,yrs),
   days=Math.floor((t-pdt(P.d))/864e5);
  const mk3=(l,v,k)=>`<label>${l}</label><input inputmode="decimal" value="${v}" onchange="empPay('${k}',this.value)">`;
- return stale()+`<div class="card"><h2>Bugün emekli olsaydın</h2><div class="m">SGK hesabı · ${dmy(P.d)} tarihli (${days} gün önce)</div>
+ return stale()+emPosCard(base,reel)+`<div class="card"><h2>Bugün emekli olsaydın</h2><div class="m">SGK hesabı · ${dmy(P.d)} tarihli (${days} gün önce)</div>
 <div style="margin:8px 0"><div class="m">Hesaplanan aylık</div><b style="font-size:26px;color:var(--a)">${f(P.aylik)} TL</b></div>
 <table><tr><td>Ek ödeme</td><td>${f(P.ek)} TL</td></tr><tr><td><b>Aylık + ek ödeme</b></td><td><b>${f(base)} TL</b></td></tr><tr><td>Ortalama aylık kazanç</td><td>${f(P.ort)} TL</td></tr><tr><td>Ortalama yıllık kazanç</td><td>${f(P.ortY)}</td></tr><tr><td>Aylık bağlanma oranı (2 / 3)</td><td>${f(P.o2)} / ${f(P.o3)}</td></tr></table>
 <div class="m" style="margin-top:6px">Prim günleri: 2000 öncesi ${f(P.p1,0)} · 2000–2008/10 arası ${f(P.p2,0)} · 2008/10 sonrası ${f(P.p3,0)} · toplam ${f(P.p1+P.p2+P.p3,0)}</div></div>
@@ -558,7 +593,7 @@ V.emm=()=>{const E=S.emp,P=E.pay,c=empCalc(),b=c.best,Q=S.rates,A=S.asg,I=S.ind,
 <div>≈ ${Q.usd?f(reel/Q.usd,0):'-'} $ · ${Q.gold?f(reel/Q.gold,1):'-'} gr altın <span class="m">(bugünkü kurla)</span></div>
 <div class="m" style="margin-top:6px">Bugünkü net asgari ücretin %${f(reel/A.net*100,0)}'i · açlık sınırının %${f(reel/I.aclik*100,0)}'i</div>`+(+P.grow>0?`<div style="margin-top:6px">Yıllık %${f(P.grow)} artış varsayımıyla nominal: <b>${f(nom,0)} TL</b></div>`:'')+
  `<p class="m">Nasıl hesaplandı: Bugünkü aylığın ortalama kazanca oranı %${f(o)}. Emekli olana kadar çalışırsan her yıl bağlanma oranına yaklaşık ${f(P.raise)} puan eklendiği varsayıldı; çarpan ${f(fac,2)}. Bu <b>SGK hesabı değildir</b>, kaba bir tahmindir; gerçek aylık o günkü kazanç, kanun ve artışlara göre değişir.</p>`:'<div class="dn">Emeklilik tarihi hesaplanamadı (çalışmadan şartlar tamamlanmıyor).</div>')+
- `<details><summary>Varsayımları değiştir</summary><div class="card">`+mk3('Yıllık eklenen bağlanma oranı (puan)',P.raise,'raise')+mk3('Ortalama kazanç yıllık reel artışı (%)',P.real,'real')+mk3('Nominal gösterim için yıllık artış varsayımı (%, 0 = gösterme)',P.grow,'grow')+`</div></details></div>`};
+ `<details><summary>Varsayımları değiştir</summary><div class="card">`+mk3('Yıllık eklenen bağlanma oranı (puan)',P.raise,'raise')+mk3('Ortalama kazanç yıllık reel artışı (%)',P.real,'real')+mk3('Nominal gösterim için yıllık artış varsayımı (%, 0 = gösterme)',P.grow,'grow')+`</div></details></div>`+statCard()};
 function empParse(tx){const o={},m=(r,i)=>{const x=tx.match(r);return x?x[i||1]:null},num2=v=>parseFloat(String(v).replace(',','.'));
  const dt=v=>{const p=v.split('.');return p[2]+'-'+p[1]+'-'+p[0]};
  let v;
@@ -626,6 +661,7 @@ function asgCalc(){const o=$('ab');if(!o)return;const A=S.asg,lim=A.net*2/3;EVN=
 // ---------- KURLAR / GÖSTERGELER / YEDEK ----------
 const mk=(lbl,val,hd)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${hd};save();render()">`;
 const CHANGELOG=[
+{v:'3.22',d:'2026-11-06',t:['Aşağı çekip yenileme artık kurlar, borsa fiyatları ve göstergeleri (enflasyon, en düşük/en yüksek emekli aylığı) birlikte günceller.','Borsa fon / sertifika özeti: kâr yalnızca fiyatı alınan kayıtlardan hesaplanır, kayıt başına kâr ve vade tarihi, fiyatı alınamayanların nedeni gösterilir.','Emeklilik › Bilgilerim: kişiye özel aylık bağlama oranı (ABO) kartı: SGK hesabındaki oran, bugünkü ve emekli olduğundaki tahmini ABO.','Emeklilik › Maaş: en düşük ve en yüksek emekli aylığı arasında yüzdelik konum.','Günlük kayıtlardan Değişim istatistiği: kur, altın, emekli aylığın, en düşük emekli aylığı ve enflasyonun eski ve şimdiki değeri.']},
 {v:'3.21',d:'2026-11-04',t:['Göstergeler: Enflasyon TCMB EVDS\'den İnternetten güncelle düğmesiyle çekilebilir (kendi ücretsiz anahtarın ve TÜFE 2025=100 seri kodu gerekir). Yıllık ve aylık oran endeksten hesaplanır, önizleme onayından sonra uygulanır; hata olursa elle giriş kalır.','EVDS anahtarı yedeğe girmez.']},
 {v:'3.20',d:'2026-11-03',t:['Ayarlar\'da yeni Alt sekmeler bölümü: alt çubuktaki ve sayfa içi sekmelerin adları değiştirilebilir (en çok 16 karakter), Varsayılan adlara dön düğmesi var.','Alt çubukta uzun sekme adı 2 satıra bölünür.']},
 {v:'3.19',d:'2026-11-01',t:['Tüm kart başlıkları okla açılıp kapanır (▾/▸). Durum hatırlanır; yazdığın değerler kapatıp açınca silinmez.']},
@@ -667,10 +703,10 @@ ${S.ka.on?`<div class="row"><div><label>Kur</label><select onchange="kurSet('k',
 <p class="m">Sadece sonuçlanmamış (aktif) fonlar için gönderilir. Telefon enerji tasarrufu bildirimi birkaç dakika geciktirebilir. Uygulama açıkken vadesi yaklaşan fonlar ana sayfanın üstünde de görünür.</p></div></div>
 <!--c:s_gun--><div class="card">${foldH('s_gun','<h2 style="margin:0">Güncelleme günlüğü</h2>',0,'Sürüm '+APP_VER+(DEV_ALLOWED?' · geliştirici':' · güvenli'))}<div ${isO('s_gun',0)?'':'hidden'} style="margin-top:10px">${CHANGELOG.map(c=>`<div style="margin-bottom:10px"><b>${c.v}</b> <span class="m">${c.d}</span><ul style="margin:4px 0 0 18px;padding:0">${c.t.map(x=>`<li class="m">${esc(x)}</li>`).join('')}</ul></div>`).join('')}<p class="m">Aynı liste GitHub'da CHANGELOG.md dosyasında da durur: <a href="https://github.com/ibrahimyildizai/yatirim/blob/main/CHANGELOG.md" target="_blank" rel="noopener">GitHub'da aç</a></p></div></div>
 <!--c:s_kay--><div class="card">${foldH('s_kay','<h2 style="margin:0">Kurlar nereden geliyor?</h2>',0)}<div ${isO('s_kay',0)?'':'hidden'} style="margin-top:10px"><p class="m">Fiziki altın alım-satımında baz alınan Harem Altın'ın resmî, herkese açık bir veri hizmeti yok; fiyatlar sitesinde canlı bağlantıyla akıyor. Bu yüzden uygulama sırayla dener:<br>1) <b>Harem Altın</b> (açık bir adres denenir)<br>2) <b>doviz.com'daki Harem fiyatı</b> (gram altın ve gümüş)<br>3) <b>Genelpara</b> (altın ve döviz alış/satış)<br>4) <b>Truncgil piyasa verisi</b> (Türkiye piyasası, gram altın ve döviz alış/satış; Harem'e yakındır ama birebir aynı olmayabilir)<br>5) <b>TCMB</b> (dolar ve euro, resmî kur)<br>6) <b>Uluslararası spot</b> (son çare; kuyumcu fiyatından farklıdır).<br>Hepsi aynı anda denenir (doğrudan bağlantı olmazsa genel bir aktarım hizmetiyle de denenir); her kur, sırayla ilk çalışan kaynaktan alınır. Hiçbiri çalışmazsa son değerler kalır ve aşağıda hangi kaynağın neden başarısız olduğu yazar.<br>Hangi kaynağın kullanıldığı üstte ve burada yazar. <b>Alış</b> = kuyumcunun senden aldığı, <b>satış</b> = senin aldığın fiyat. Geçmiş tarihli fiyatlar (alış tarihi, fon karşılaştırması) ve hesaplayıcıdaki değişim tahminleri uluslararası spot kaynaklıdır.</p>${rateLog()}</div></div>
-<!--c:s_gos--><div class="card">${foldH('s_gos','<h2 style="margin:0">Göstergeler</h2>',0,`Enflasyon %${f(I.enfY)} · ${I.enfD}`)}<div ${isO('s_gos',0)?'':'hidden'} style="margin-top:10px"><p class="m">Enflasyon TCMB EVDS'den çekilebilir (ücretsiz anahtar gerekir). Açlık/yoksulluk sınırı elle girilir.</p><label>EVDS anahtarı</label><input type="password" autocomplete="off" placeholder="${evCfg().k?'kayıtlı (değiştirmek için yaz)':'evds3.tcmb.gov.tr → Profilim'}" onchange="evSet('k',this.value)"><label>TÜFE seri kodu (2025=100, Genel)</label><input value="${esc(evCfg().c||'')}" placeholder="EVDS'te serinin kodu" onchange="evSet('c',this.value)"><button class="g" onclick="evUpd()">İnternetten güncelle</button><div id="evst" class="gst" hidden></div><p class="m" style="font-size:12px">Anahtar yalnızca bu telefonda, yedeğin dışında saklanır.</p>`+
+<!--c:s_gos--><div class="card">${foldH('s_gos','<h2 style="margin:0">Göstergeler</h2>',0,`Enflasyon %${f(I.enfY)} · ${I.enfD}`)}<div ${isO('s_gos',0)?'':'hidden'} style="margin-top:10px"><p class="m">Enflasyon TCMB EVDS'den çekilebilir (ücretsiz anahtar gerekir). Diğer göstergeler yenilemede veri dosyasından gelir, istersen elle de yazabilirsin.</p>${I.ut?`<p class="m" style="font-size:12px">Son otomatik kontrol: ${esc(I.ut)}</p>`:''}<label>EVDS anahtarı</label><input type="password" autocomplete="off" placeholder="${evCfg().k?'kayıtlı (değiştirmek için yaz)':'evds3.tcmb.gov.tr → Profilim'}" onchange="evSet('k',this.value)"><label>TÜFE seri kodu (2025=100, Genel)</label><input value="${esc(evCfg().c||'')}" placeholder="EVDS'te serinin kodu" onchange="evSet('c',this.value)"><button class="g" onclick="evUpd()">İnternetten güncelle</button><div id="evst" class="gst" hidden></div><p class="m" style="font-size:12px">Anahtar yalnızca bu telefonda, yedeğin dışında saklanır.</p>`+
  mk('Yıllık enflasyon %',I.enfY,'S.ind.enfY=num(this.value)')+mk('Aylık enflasyon %',I.enfA,'S.ind.enfA=num(this.value)')+
  `<label>Enflasyon dönemi</label><input value="${I.enfD}" onchange="S.ind.enfD=this.value;save();render()">`+
- mk('Açlık sınırı (TL)',I.aclik,'S.ind.aclik=num(this.value)')+mk('Yoksulluk sınırı (TL)',I.yoks,'S.ind.yoks=num(this.value)')+
+ mk('En düşük emekli aylığı (TL)',emMin(),'S.ind.emMin=num(this.value)')+mk('En yüksek emekli aylığı (TL, tahmini)',emMax(),'S.ind.emMax=num(this.value)')+`<label>Emekli aylığı dönemi</label><input value="${esc(I.emD||'Temmuz 2026')}" onchange="S.ind.emD=this.value;save();render()">`+mk('Açlık sınırı (TL)',I.aclik,'S.ind.aclik=num(this.value)')+mk('Yoksulluk sınırı (TL)',I.yoks,'S.ind.yoks=num(this.value)')+
  `<label>Açlık/yoksulluk dönemi</label><input value="${I.aclikD}" onchange="S.ind.aclikD=this.value;save();render()"></div></div>
 <!--c:s_yed--><div class="card"><h2>Yedekleme</h2><p style="font-size:14px;line-height:1.45;margin:0 0 8px">Uygulamayı silmeden ya da yeni APK kurmadan önce yedeği <b>telefona kaydet</b>. Uygulamayı silince <b>uygulamanın içindeki yedekler de silinir</b>; ama kaydettiğin dosya telefonda (Dosyalar, Drive ya da WhatsApp'ta) kalır. Yeniden kurunca <b>Yedek dosyasından geri yükle</b>'ye dokun.</p>
 ${bkUI()}
