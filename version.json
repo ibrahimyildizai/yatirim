@@ -1,8 +1,11 @@
 {
- "v": "3.19",
- "d": "2026-11-01",
+ "v": "3.22",
+ "d": "2026-11-06",
  "n": [
-  "Tüm kart başlıkları okla açılıp kapanır (▾/▸). Durum hatırlanır; yazdığın değerler kapatıp açınca silinmez."
+  "Aşağı çekip yenileme artık kurlar, borsa fiyatları ve göstergeleri (enflasyon, en düşük/en yüksek emekli aylığı) birlikte günceller.",
+  "Borsa fon / sertifika özeti: kâr yalnızca fiyatı alınan kayıtlardan hesaplanır, kayıt başına kâr ve vade tarihi, fiyatı alınamayanların nedeni gösterilir.",
+  "Emeklilik › Bilgilerim: kişiye özel aylık bağlama oranı (ABO) kartı: SGK hesabındaki oran, bugünkü ve emekli olduğundaki tahmini ABO.",
+  "Emeklilik › Maaş: en düşük ve en yüksek emekli aylığı arasında yüzdelik konum."
  ],
  "u": "https://github.com/ibrahimyildizai/yatirim/releases/latest"
 }
