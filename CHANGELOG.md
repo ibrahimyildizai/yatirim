@@ -1,5 +1,11 @@
 # Yatırım Takip – Güncelleme Günlüğü
 
+## 3.23 (2026-11-07)
+- GitHub bağlantısı ve Hakkında ekranında GitHub’a gönderilen son sürüm notu gösterilir. Not elle değil, köprü gönderimi başarılı olunca otomatik güncellenir; çalışan sürüm gönderilmemişse bunu da söyler.
+- Yapılacaklar kuyruğu artık yeni sürümle gelen madde değişikliklerini mevcut listeye de uygular (tamamlananlar işaretlenir, yeni maddeler eklenir).
+- GitHub bağlantısı kartına depo sayfasını açan bağlantı eklendi.
+- Borsa fon özeti: Elle girdiğim kurları koru seçiliyken açılışta fon fiyatları hiç çekilmiyordu, düzeltildi. Her satırda fiyatın alındığı saat gösterilir; yeni fiyat alınamadıysa eski fiyat uyarıyla ve nedeniyle birlikte yazılır.
+
 ## 3.22 (2026-11-06)
 - Aşağı çekip yenileme artık kurlar, borsa fiyatları ve göstergeleri (enflasyon, en düşük/en yüksek emekli aylığı) birlikte günceller.
 - Borsa fon / sertifika özeti: kâr yalnızca fiyatı alınan kayıtlardan hesaplanır, kayıt başına kâr ve vade tarihi, fiyatı alınamayanların nedeni gösterilir.
