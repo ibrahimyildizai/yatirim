@@ -31,8 +31,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 3px;t
 </style></head><body><div id="h"></div><div class="w" id="v">Yükleniyor…</div><nav id="n"></nav><div id="pt" style="display:none;position:fixed;top:calc(64px + env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:9;color:#3ddc97;font-weight:700;pointer-events:none"></div>
 <script>
 window.addEventListener('error',function(e){if(e.message)document.body.insertAdjacentHTML('afterbegin','<pre style="color:#ff6b6b;white-space:pre-wrap;padding:8px">HATA: '+e.message+' @'+e.lineno+'</pre>')});
-const APP_VER='3.22';
-var DEV_ALLOWED=false;
+const APP_VER='3.23';
+var DEV_ALLOWED=true;
 const K='yt1',KH='yt1h',KB='yt1b',KD='yt1d',KU='yt1u',KF='yt1f',KL='yt1l';
 let UP={};try{UP=JSON.parse(localStorage.getItem(KU)||'{}')||{}}catch(e){UP={}}
 const nm=(id,d)=>{const v=(UP.nn||{})[id];return v?v:d},nmE=(id,d)=>esc(nm(id,d));
@@ -77,6 +77,18 @@ function empAmt(){const E=S.emp,P=E.pay,c=empCalc(),b=c.best,t=pdt(today()),o=P.
 function aboCard(){const E=S.emp,P=E.pay,a=empAmt(),o=P.ort>0&&P.aylik>0?P.aylik/P.ort*100:0,up=E.work?(+P.raise||0)*a.yrs:0,has=(+P.o2>0||+P.o3>0)||o>0;
  if(!has)return `<div class="card"><h2>Aylık bağlama oranım (ABO)</h2><p class="m" style="margin:0">SGK aylık hesabı girilmemiş. Güncelle bölümündeki SGK aylık hesabına ortalama kazanç, aylık ve bağlama oranlarını yaz; ABO kişiye özel buradan hesaplanır.</p></div>`;
  return `<div class="card"><h2>Aylık bağlama oranım (ABO)</h2><div class="m">SGK hesabı · ${dmy(P.d)} tarihli</div><table>${+P.o2>0||+P.o3>0?`<tr><td>SGK'daki oran (2 / 3)</td><td>${f(P.o2)} / ${f(P.o3)}</td></tr>`:''}${o>0?`<tr><td><b>Bugünkü ABO</b> (aylık ÷ ort. kazanç)</td><td><b>%${f(o)}</b></td></tr>`:''}${o>0&&a.b?`<tr><td>Emekli olduğunda tahmini</td><td>%${f(o+up)}</td></tr>`:''}</table><p class="m">ABO, ortalama kazancının yüzde kaçının aylık olarak bağlandığını gösterir. Emekli olana kadar çalışırsan oran artar (yıllık +${f(P.raise)} puan varsayımıyla tahmin). Kaba tahmindir, SGK hesabı değildir.</p></div>`}
+const TODO0=['3.20: Ayarlar → Alt sekmeler: bir sekme adını değiştir, 2 satır görünüyor mu bak','Ayarlar → Göstergeler: EVDS anahtarını ve TÜFE (2025=100) seri kodunu gir, İnternetten güncelle de. Sonuç yıllık %29,77 / aylık %2,58 çıkmalı','veri.json dosyasını GitHub deposuna (version.json yanına) yükle','Ayarlar → Göstergeler: En yüksek emekli aylığı için kendi tavanını yaz (90.000 TL tahmini)','Fon sekmesi: DMLKT fiyatı geliyor mu, Borsa özetinde kâr ve vade doğru mu kontrol et','Emeklilik › Bilgilerim: ABO kartı kendi SGK değerlerinle doğru mu bak','Yeni build.yml dosyasını GitHub deposuna yükle (.github/workflows/build.yml), Actions yeşil bitiyor mu bak','3.23: GitHub bağlantısı ve Hakkında ekranında son gönderilen sürüm notu görünüyor mu; 3.23 gönderince not 3.23 oluyor mu','Hedef tarihi bildirimini telefonda dene','Play öncesi: DEV_ALLOWED=false, UPD_URL, eski index.html yükleyicisi, token iptali'];
+const TODO_V=1;
+function todoMig(L){const A=(a,b)=>{const x=L.find(v=>String(v.t).indexOf(a)==0);return x};
+ const b=A('build.yml ve package.json');if(b)b.d=1;
+ const g=A('3.22 GitHub Actions yeşil mi');if(g)g.t='Yeni build.yml dosyasını GitHub deposuna yükle (.github/workflows/build.yml), Actions yeşil bitiyor mu bak';
+ const n='3.23: GitHub bağlantısı ve Hakkında ekranında son gönderilen sürüm notu görünüyor mu; 3.23 gönderince not 3.23 oluyor mu';
+ if(!L.some(v=>v.t==n))L.push({id:Math.max(0,...L.map(x=>x.id))+1,t:n,d:0})}
+function todoGet(){if(!Array.isArray(S.todo)){S.todo=TODO0.map((t,i)=>({id:i+1,t:t,d:0}));S.todoV=TODO_V}else if((S.todoV|0)<TODO_V){todoMig(S.todo);S.todoV=TODO_V;save(true)}return S.todo}
+function todoTg(id){const x=todoGet().find(v=>v.id==id);if(x){x.d=x.d?0:1;save(true);render()}}
+function todoDel(id){S.todo=todoGet().filter(v=>v.id!=id);save(true);render()}
+function todoAdd(){const e=$('tdn'),v=e&&e.value.trim();if(!v)return;const L=todoGet();L.push({id:Math.max(0,...L.map(x=>x.id))+1,t:v.slice(0,200),d:0});save(true);render()}
+function todoCard(){const L=todoGet(),n=L.filter(x=>!x.d).length;return `<!--c:s_tdo--><div class="card">${foldH('s_tdo','<h2 style="margin:0">Yapılacaklar</h2>',1,n?n+' açık madde':'Hepsi tamam ✓')}<div ${isO('s_tdo',1)?'':'hidden'} style="margin-top:10px">${L.map(x=>`<div style="display:flex;gap:8px;align-items:flex-start;margin:8px 0"><input type="checkbox" ${x.d?'checked':''} onchange="todoTg(${x.id})" style="width:22px;height:22px;margin:0;flex:none"><div style="flex:1;min-width:0;${x.d?'text-decoration:line-through;opacity:.55':''}">${esc(x.t)}</div><button class="g" style="width:auto;padding:2px 10px;margin:0" onclick="todoDel(${x.id})">×</button></div>`).join('')}<input id="tdn" placeholder="Yeni madde ekle" maxlength="200"><button class="g" onclick="todoAdd()">Ekle</button><p class="m">Bana "kuyruğa ekle" dersen yeni sürümde buraya eklenir.</p></div></div>`}
 function recStat(){try{const a=empAmt(),r=S.rates,d=today();if(!(r.usd>0))return;S.stat=(S.stat||[]).filter(x=>x.d!=d);S.stat.push({d:d,usd:r.usd,eur:r.eur,gold:r.gold,pb:a.base,pr:a.reel,mn:emMin(),mx:emMax(),ey:+S.ind.enfY});S.stat.sort((x,y)=>x.d>y.d?1:-1);if(S.stat.length>800)S.stat=S.stat.slice(-800);save(true)}catch(e){}}
 function emPosCard(base,reel){const mn=emMin(),mx=emMax(),I=S.ind;
  const row=(l,v)=>{const p=(v-mn)/(mx-mn)*100,w=Math.max(0,Math.min(100,p));return `<div style="margin:10px 0"><div>${l}: <b>${f(v,0)} TL</b></div><div style="background:var(--nv);border-radius:8px;height:12px;margin:6px 0;overflow:hidden"><div style="width:${w}%;height:100%;background:var(--a)"></div></div><div>${v<mn?'<span class="dn">En düşük aylığın altında</span> (tamamlama ile en az '+f(mn,0)+' TL ödenir)':v>mx?'<b>En yüksek sınırın üstünde</b>':'<b>%'+f(p,1)+'</b> konumunda'}</div></div>`};
@@ -195,7 +207,7 @@ async function loadPast(){const d=new Date(Date.now()-91*864e5).toISOString().sl
  try{const rr=await Promise.all([getRates(d),getRates()]),r=rr[0],n=rr[1];S.past=Object.assign({d,nd:today(),now:{gold:n.gold,silver:n.silver,usd:n.usd,eur:n.eur}},r);save(true)}catch(e){}}
 let busy=false,err=false,rtry=0;
 function autoSnap(r){const d=today();S.snaps=S.snaps.filter(s=>s.d!=d);S.snaps.push({d:d,gold:r.gold,silver:r.silver,usd:r.usd,eur:r.eur});S.snaps.sort((a,b)=>a.d>b.d?1:-1);if(S.snaps.length>800)S.snaps=S.snaps.slice(-800)}
-async function refresh(auto){if(busy)return;if(auto&&S.lock&&S.rates.usd)return;busy=true;err=false;render();
+async function refresh(auto){if(busy)return;if(auto&&S.lock&&S.rates.usd){qNow(true);return}busy=true;err=false;render();
  try{const r=await fetchLive(),o=S.rates;S.rates=Object.assign({},o,r,{src:Object.assign({},o.src,r.src),t:nowS(),ts:Date.now()});autoSnap(S.rates);save(true);rtry=0;await loadPast();try{kurCheck()}catch(x){}}catch(e){err=true}
  try{await refQ()}catch(e){}
  try{await refInd()}catch(e){}
@@ -317,7 +329,7 @@ async function refQ(){const ks=[...new Set(S.funds.filter(x=>x.k&&x.p==null).map
  if(ok)save(true);return ok}
 async function qNow(silent){if(!silent)toast('Fiyat alınıyor…');try{const n=await refQ();render();if(!silent)toast(n?'Fiyat güncellendi ✓':'Fiyat alınamadı')}catch(e){if(!silent)toast('Fiyat alınamadı')}}
 function fsum(){const A=S.funds.filter(x=>x.p==null&&!mat(x)),P=A.filter(x=>x.q>0&&qp(x)>0),pl=P.reduce((s,x)=>s+qp(x)*x.q-x.a,0);return A.length+' aktif'+(S.funds.some(mat)?' · '+S.funds.filter(mat).length+' vadesi doldu':'')+(P.length?` · ${pl>=0?'kâr':'zarar'} ${f(Math.abs(pl))} TL`:'')}
-function qStamp(P){const Z=P.map(x=>(S.q||{})[qn(x.k)]).filter(q=>q&&q.ts);if(!Z.length)return '';const o=Z.reduce((a,b)=>b.ts<a.ts?b:a);return `<p class="m">Fiyatlar en son: ${esc(o.t)}</p>`}
+function qStamp(P){const Z=P.map(x=>(S.q||{})[qn(x.k)]).filter(q=>q&&q.ts);if(!Z.length)return `<p class="m">Borsa fiyatı henüz alınmadı. Fiyatlar açık kaynaklardan çekilir, resmî değildir.</p>`;const o=Z.reduce((a,b)=>b.ts<a.ts?b:a),sr=[...new Set(Z.map(q=>q.src).filter(Boolean))].join(', ');return `<p class="m">Fiyatlar en son: ${esc(o.t)}${sr?' · Kaynak: '+esc(sr):''}<br>Bu fiyatlar açık kaynaklardan (resmî olmayan, ücretsiz veri siteleri) alınır; gecikmeli ya da hatalı olabilir. Karar vermeden önce aracı kurumundaki fiyatı kontrol et.</p>`}
 function posCard(){const P=S.funds.filter(x=>x.p==null&&!mat(x)&&isB(x));if(!P.length)return '';let cost=0,val=0,mc=0;const ok=[],miss=[];
  P.forEach(x=>{const pr=qp(x),a=+x.a||0;if(pr>0&&x.q>0){cost+=a;val+=pr*x.q;ok.push(x)}else{mc+=a;miss.push(x)}});
  const pl=val-cost,td=day(today()),vd=x=>x.o?'açık vade':(x.e?dmy(x.e)+' ('+Math.round((day(x.e)-td)/864e5)+' gün)':'-');
@@ -326,7 +338,7 @@ function posCard(){const P=S.funds.filter(x=>x.p==null&&!mat(x)&&isB(x));if(!P.l
  if(ok.length)h+=`Toplam maliyet: <b>${f(cost)} TL</b><br>Güncel değer: <b>${f(val)} TL</b><br>${pl>=0?'Kâr':'Zarar'}: <b class="${pl>=0?'up':'dn'}">${f(Math.abs(pl))} TL</b> ${pc(cost?pl/cost*100:0)}`;
  else h+=`<div class="dn">Kâr hesaplanamadı: hiçbir kayıtta anlık fiyat alınamadı.</div>`;
  if(nx)h+=`<br>En yakın vade: <b>${dmy(nx.e)}</b> (${Math.round((day(nx.e)-td)/864e5)} gün)`;
- h+=`<div style="margin-top:8px">`+P.map(x=>{const pr=qp(x),r=pr>0&&x.q>0?x.q*pr-(+x.a||0):null;return `<div class="m" style="margin:3px 0">${esc(x.k||x.n||'-')} · ${r==null?'fiyat yok':`<span class="${r>=0?'up':'dn'}">${r>=0?'+':'−'}${f(Math.abs(r))} TL</span>`} · Vade: ${vd(x)}</div>`}).join('')+`</div>`;
+ h+=`<div style="margin-top:8px">`+P.map(x=>{const pr=qp(x),r=pr>0&&x.q>0?x.q*pr-(+x.a||0):null;const q=(S.q||{})[qn(x.k)],er=QE[qn(x.k)],pt=pr>0?(q&&q.t?' · fiyat '+f(pr)+' TL ('+esc(String(q.t).slice(0,16))+')':' · fiyat '+f(pr)+' TL (elle)'):'';return `<div class="m" style="margin:3px 0">${esc(x.k||x.n||'-')} · ${r==null?'fiyat yok':`<span class="${r>=0?'up':'dn'}">${r>=0?'+':'−'}${f(Math.abs(r))} TL</span>`}${pt} · Vade: ${vd(x)}${pr>0&&er?`<br><span class="dn">⚠ Güncel fiyat alınamadı, eski fiyat gösteriliyor (${esc(String(er).slice(0,120))})</span>`:''}</div>`}).join('')+`</div>`;
  if(miss.length)h+=`<p class="m">Fiyatı alınamayan ${miss.length} kayıt (maliyet ${f(mc)} TL) kâra katılmadı: `+miss.map(x=>esc(qn(x.k)||'-')+(QE[qn(x.k)]?' ('+esc(String(QE[qn(x.k)]).slice(0,80))+')':'')).join('; ')+`</p>`;
  return h+qStamp(P)+`<button class="g" onclick="qNow()">Fiyatları güncelle</button></div>`}
 
@@ -661,7 +673,8 @@ function asgCalc(){const o=$('ab');if(!o)return;const A=S.asg,lim=A.net*2/3;EVN=
 // ---------- KURLAR / GÖSTERGELER / YEDEK ----------
 const mk=(lbl,val,hd)=>`<label>${lbl}</label><input inputmode="decimal" value="${val}" onchange="${hd};save();render()">`;
 const CHANGELOG=[
-{v:'3.22',d:'2026-11-06',t:['Aşağı çekip yenileme artık kurlar, borsa fiyatları ve göstergeleri (enflasyon, en düşük/en yüksek emekli aylığı) birlikte günceller.','Borsa fon / sertifika özeti: kâr yalnızca fiyatı alınan kayıtlardan hesaplanır, kayıt başına kâr ve vade tarihi, fiyatı alınamayanların nedeni gösterilir.','Emeklilik › Bilgilerim: kişiye özel aylık bağlama oranı (ABO) kartı: SGK hesabındaki oran, bugünkü ve emekli olduğundaki tahmini ABO.','Emeklilik › Maaş: en düşük ve en yüksek emekli aylığı arasında yüzdelik konum.','Günlük kayıtlardan Değişim istatistiği: kur, altın, emekli aylığın, en düşük emekli aylığı ve enflasyonun eski ve şimdiki değeri.']},
+{v:'3.23',d:'2026-11-07',t:['GitHub bağlantısı ve Hakkında ekranında GitHub’a gönderilen son sürüm notu gösterilir. Not elle değil, köprü gönderimi başarılı olunca otomatik güncellenir; çalışan sürüm gönderilmemişse bunu da söyler.','Yapılacaklar kuyruğu artık yeni sürümle gelen madde değişikliklerini mevcut listeye de uygular (tamamlananlar işaretlenir, yeni maddeler eklenir).','GitHub bağlantısı kartına depo sayfasını açan bağlantı eklendi.','Borsa fon özeti: Elle girdiğim kurları koru seçiliyken açılışta fon fiyatları hiç çekilmiyordu, düzeltildi. Her satırda fiyatın alındığı saat gösterilir; yeni fiyat alınamadıysa eski fiyat uyarıyla ve nedeniyle birlikte yazılır.']},
+{v:'3.22',d:'2026-11-06',t:['Aşağı çekip yenileme artık kurlar, borsa fiyatları ve göstergeleri (enflasyon, en düşük/en yüksek emekli aylığı) birlikte günceller.','Borsa fon / sertifika özeti: kâr yalnızca fiyatı alınan kayıtlardan hesaplanır, kayıt başına kâr ve vade tarihi, fiyatı alınamayanların nedeni gösterilir.','Ayarlar › Yapılacaklar: işaretlenebilir görev kuyruğu, açılışta kaç açık madde olduğunu bildirir, kendi maddeni ekleyebilirsin.','Borsa fiyatlarının açık kaynaktan geldiği ve resmî olmadığı uyarısı, kaynak adı gösterilir.','Emeklilik › Bilgilerim: kişiye özel aylık bağlama oranı (ABO) kartı: SGK hesabındaki oran, bugünkü ve emekli olduğundaki tahmini ABO.','Emeklilik › Maaş: en düşük ve en yüksek emekli aylığı arasında yüzdelik konum.','Günlük kayıtlardan Değişim istatistiği: kur, altın, emekli aylığın, en düşük emekli aylığı ve enflasyonun eski ve şimdiki değeri.']},
 {v:'3.21',d:'2026-11-04',t:['Göstergeler: Enflasyon TCMB EVDS\'den İnternetten güncelle düğmesiyle çekilebilir (kendi ücretsiz anahtarın ve TÜFE 2025=100 seri kodu gerekir). Yıllık ve aylık oran endeksten hesaplanır, önizleme onayından sonra uygulanır; hata olursa elle giriş kalır.','EVDS anahtarı yedeğe girmez.']},
 {v:'3.20',d:'2026-11-03',t:['Ayarlar\'da yeni Alt sekmeler bölümü: alt çubuktaki ve sayfa içi sekmelerin adları değiştirilebilir (en çok 16 karakter), Varsayılan adlara dön düğmesi var.','Alt çubukta uzun sekme adı 2 satıra bölünür.']},
 {v:'3.19',d:'2026-11-01',t:['Tüm kart başlıkları okla açılıp kapanır (▾/▸). Durum hatırlanır; yazdığın değerler kapatıp açınca silinmez.']},
@@ -684,7 +697,7 @@ V.krl=()=>lockCards(krl0());
 const krl0=()=>{setTimeout(ntRefresh,0);if(anyLk()&&!UNL)setTimeout(()=>{const e=$('pwi');e&&e.focus()},80);if(FLIST===undefined&&FL()&&YF()){FLIST='yük';fLoad()}let B=[];try{B=JSON.parse(localStorage.getItem(KB)||'[]')}catch(e){}const I=S.ind;
  let used=0;try{for(const k in localStorage)if(Object.prototype.hasOwnProperty.call(localStorage,k))used+=(k.length+String(localStorage[k]).length)*2}catch(e){}
  const o=!!localStorage.getItem('app_html'),p=!!localStorage.getItem('app_prev'),wv=(navigator.userAgent.match(/Chrome\/[\d.]+/)||['?'])[0];
- return `${devCards()}<!--c:s_snm--><div class="card">${foldH('s_snm','<h2 style="margin:0">Alt sekmeler</h2>',0,Object.keys(UP.nn||{}).length?Object.keys(UP.nn).length+' ad değiştirildi':'Varsayılan adlar')}<div ${isO('s_snm',0)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Sekme adlarını değiştir (en çok 16 karakter; sığmazsa 2 satıra bölünür). Boş bırakırsan varsayılan ad döner.</p><div class="m"><b>Alt çubuk</b></div>${NAV.map(g=>`<label>${esc(g[1])}</label><input maxlength="16" placeholder="${esc(g[1])}" value="${esc((UP.nn||{})['g:'+g[0]]||'')}" onchange="nmSet('g:${g[0]}',this.value)">`).join('')}<div class="m" style="margin-top:10px"><b>Sayfa sekmeleri</b></div>${NAV.map(g=>g[2].length>1?g[2].map(x=>`<label>${esc(g[1])} › ${esc(x[1])}</label><input maxlength="16" placeholder="${esc(x[1])}" value="${esc((UP.nn||{})['t:'+x[0]]||'')}" onchange="nmSet('t:${x[0]}',this.value)">`).join(''):'').join('')}<button class="g" onclick="nmReset()">Varsayılan adlara dön</button></div></div><!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0,thSum())}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['auto','Sistemi takip et'],['light','Açık'],['dark','Koyu'],['black','Siyah']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
+ return `${devCards()}${todoCard()}<!--c:s_snm--><div class="card">${foldH('s_snm','<h2 style="margin:0">Alt sekmeler</h2>',0,Object.keys(UP.nn||{}).length?Object.keys(UP.nn).length+' ad değiştirildi':'Varsayılan adlar')}<div ${isO('s_snm',0)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Sekme adlarını değiştir (en çok 16 karakter; sığmazsa 2 satıra bölünür). Boş bırakırsan varsayılan ad döner.</p><div class="m"><b>Alt çubuk</b></div>${NAV.map(g=>`<label>${esc(g[1])}</label><input maxlength="16" placeholder="${esc(g[1])}" value="${esc((UP.nn||{})['g:'+g[0]]||'')}" onchange="nmSet('g:${g[0]}',this.value)">`).join('')}<div class="m" style="margin-top:10px"><b>Sayfa sekmeleri</b></div>${NAV.map(g=>g[2].length>1?g[2].map(x=>`<label>${esc(g[1])} › ${esc(x[1])}</label><input maxlength="16" placeholder="${esc(x[1])}" value="${esc((UP.nn||{})['t:'+x[0]]||'')}" onchange="nmSet('t:${x[0]}',this.value)">`).join(''):'').join('')}<button class="g" onclick="nmReset()">Varsayılan adlara dön</button></div></div><!--c:s_gor--><div class="card">${foldH('s_gor','<h2 style="margin:0">Görünüm</h2>',0,thSum())}<div ${isO('s_gor',0)?'':'hidden'} style="margin-top:10px"><label>Tema</label><div class="chips">${[['auto','Sistemi takip et'],['light','Açık'],['dark','Koyu'],['black','Siyah']].map(t=>`<button class="${S.th.m==t[0]?'on':''}" onclick="setTh('${t[0]}')">${t[1]}</button>`).join('')}</div>
 <label>Renk</label><div class="chips">${Object.entries(ACC).map(a=>`<button class="${S.th.c==a[0]?'on':''}" onclick="setAcc('${a[0]}')"><i class="dot" style="background:${a[1][1]}"></i>${a[1][0]}</button>`).join('')}</div>
 <label>Tasarım</label><div class="chips">${[['round','Yuvarlak'],['flat','Düz']].map(t=>`<button class="${(S.th.s=='flat'?'flat':'round')==t[0]?'on':''}" onclick="setShape('${t[0]}')">${t[1]}</button>`).join('')}</div></div></div>
 <!--c:s_kur--><div class="card">${foldH('s_kur','<h2 style="margin:0">Kurlar (TL)</h2>',0,`Son: ${S.rates.t||'-'} · ${srcText(S.rates.src)}`)}<div ${isO('s_kur',0)?'':'hidden'} style="margin-top:10px"><p class="m">Son güncelleme: ${S.rates.t||'-'}<br>Kaynak: <b>${srcText(S.rates.src)}</b><br>Gram altın: alış ${f(S.rates.gold)} · satış ${f(S.rates.goldS||S.rates.gold)} TL<br>Aşağıdaki kutular <b>alış</b> fiyatıdır (kuyumcunun senden aldığı); portföy değeri bununla hesaplanır. Elle düzeltebilirsin.</p>`+
@@ -718,7 +731,7 @@ ${bkUI()}
  `</details></div>
 <!--c:s_ver--><div class="card"><h2>Veri</h2><p class="m">Kullanılan alan: ${(used/1024).toFixed(0)} KB · Geri/ileri geçmişi: ${HS.U.length+HS.R.length} adım</p>
 <button class="g" onclick="clrHist()">Geçmişi temizle</button><button class="d" onclick="resetAll()">Tüm verileri sıfırla</button></div>
-<!--c:pw-->${pwCard()}<!--c:s_hak--><div class="card"><h2>Hakkında</h2><p class="m">Yatırım Takip ${APP_VER}${DEV_ALLOWED?' (geliştirici)':''} · ${wv}<br>Son kur güncellemesi: ${S.rates.t||'-'}<br>Veriler yalnızca bu telefonda saklanır.</p><button class="g" onclick="updNow()">Güncellemeyi denetle</button></div>`};
+<!--c:pw-->${pwCard()}<!--c:s_hak--><div class="card"><h2>Hakkında</h2><p class="m">Yatırım Takip ${APP_VER}${DEV_ALLOWED?' (geliştirici)':''} · ${wv}<br>Son kur güncellemesi: ${S.rates.t||'-'}${DEV_ALLOWED?'<br>'+gvLine():''}<br>Veriler yalnızca bu telefonda saklanır.</p><button class="g" onclick="updNow()">Güncellemeyi denetle</button></div>`};
 // ---------- KUR UYARISI (isteğe bağlı, yalnızca uygulama açıkken) ----------
 const KUR=[['usd','Dolar'],['eur','Euro'],['gold','Gram altın'],['silver','Gümüş']];
 async function kurCheck(){const a=S.ka;if(!a||!a.on||!(a.v>0))return;const cur=+(S.rates||{})[a.k];if(!(cur>0))return;
@@ -746,7 +759,9 @@ function updBanner(){const u=updInfo;if(!u||!(cmpV(u.v,APP_VER)>0)||localStorage
  const url=/^https:\/\/github\.com\//.test(u.u||'')?u.u:'',nt=(u.n||[]).slice(0,3).map(x=>'· '+esc(x)).join('<br>');
  return `<div class="card" style="border:1px solid var(--b)"><b>Yeni sürüm ${esc(u.v)} var</b> <span class="m">(şu an ${APP_VER})</span>${nt?`<div class="m" style="font-size:13px;margin:6px 0">${nt}</div>`:''}<div style="display:flex;gap:8px;align-items:center;margin-top:8px">${url?`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block;padding:11px 16px;border-radius:12px;background:var(--b);color:#fff;text-decoration:none;font-weight:700">İndirme sayfası</a>`:''}<button class="g" style="margin:0" onclick="localStorage.setItem('ytud','${esc(u.v)}');render()">Sonra</button></div><div class="m" style="font-size:12px;margin-top:6px">Uygulama kendini değiştirmez; indirdiğin APK'yı üstüne kurarsın, verilerin korunur.</div></div>`}
 // ---------- GELİŞTİRİCİ KÖPRÜSÜ (yalnızca DEV_ALLOWED=true sürümde) ----------
-const KDV='ytdv',KGH='ytgh',KGS='ytgs';
+const KDV='ytdv',KGH='ytgh',KGS='ytgs',KGV='ytgv';
+function gvGet(){try{const j=JSON.parse(localStorage.getItem(KGV)||'null');if(j&&j.v)return j}catch(e){}return{v:'3.22',s:0,t:''}}
+function gvLine(){const g=gvGet();let r='GitHub’a gönderilen son sürüm: <b>'+esc(g.v)+'</b>'+(g.s?' (güvenli)':g.t?' (geliştirici)':'')+(g.t?' · '+esc(g.t):'');if(cmpV(APP_VER,g.v)>0)r+='<br>Çalışan sürüm '+APP_VER+' henüz gönderilmedi.';return r}
 function isDev(){try{return DEV_ALLOWED&&localStorage.getItem(KDV)==='1'}catch(e){return false}}
 function ghc(){try{return JSON.parse(localStorage.getItem(KGH)||'{}')||{}}catch(e){return{}}}
 function gst(){try{return JSON.parse(localStorage.getItem(KGS)||'null')}catch(e){return null}}
@@ -760,7 +775,7 @@ function devCards(){
 <button class="g bw" onclick="$('upf').click()">Dosyadan seç</button><input type="file" id="upf" accept=".html,.txt,text/html,text/plain" style="display:none" onchange="pickApp(this)">
 <textarea id="upt" rows="4" placeholder="Ya da dosya metnini yapıştır" style="margin-top:8px"></textarea><button class="g bw" onclick="installApp($('upt').value)">Yapıştırılanı uygula</button>
 <button class="g bw" onclick="revApp()" ${p?'':'disabled'}>Önceki sürüme dön</button><button class="bw w2" onclick="facApp()" ${o?'':'disabled'}>Fabrika sürüme dön</button></div></div>
-<!--c:s_git--><div class="card">${devH('s_git','GitHub bağlantısı',esc(c.repo||'Ayarlanmadı'),c.tok?dBadge('✓','ok2'):'',1)}<div ${isO('s_git',1)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Depo ve token sadece bu telefonda saklanır, yedeğe girmez. Token: yalnızca bu depo, "Contents: Read and write".</p>
+<!--c:s_git--><div class="card">${devH('s_git','GitHub bağlantısı',esc(c.repo||'Ayarlanmadı'),c.tok?dBadge('✓','ok2'):'',1)}<div ${isO('s_git',1)?'':'hidden'} style="margin-top:10px"><p class="m" style="margin-top:0">Depo ve token sadece bu telefonda saklanır, yedeğe girmez. Token: yalnızca bu depo, "Contents: Read and write".</p><p class="m">${gvLine()}${c.repo?`<br><a href="https://github.com/${esc(c.repo)}" target="_blank" rel="noopener">GitHub’da depoyu aç</a>`:''}</p>
 <input id="gr" placeholder="kullanici/depo" value="${esc(c.repo||'')}"><input id="gb" placeholder="dal (main)" value="${esc(c.br||'main')}"><input id="gt" type="password" autocomplete="off" placeholder="${c.tok?'Token kayıtlı (değiştirmek için yaz)':'Token'}"><button class="g bw" onclick="ghSave()">Kaydet</button>
 ${o?`<button class="bw" onclick="ghSend(0)">Geliştirici sürümünü GitHub'a gönder</button><button class="g bw" onclick="ghSend(1)">Güvenli sürümü GitHub'a gönder</button>`:`<p class="m">Göndermek için önce yukarıdan bir deneme sürümü yükle.</p>`}
 <div class="gst${gs&&gs.e?' er':''}" id="gst" ${gs?'':'hidden'}>${gs?esc(gs.t+' - '+gs.m):''}</div></div></div>
@@ -791,11 +806,12 @@ async function ghSend(safe){
  try{
   const f=await ghF(c,'GET','www/app.html');if(!f)throw 404;
   await ghF(c,'PUT','www/app.html',{message:v+': '+(safe?'güvenli':'geliştirici')+' sürüm',content:b64e(html),branch:c.br,sha:f.sha});
+  try{localStorage.setItem(KGV,JSON.stringify({v:v,s:safe?1:0,t:nowS()}))}catch(x){}
   const g=await ghF(c,'GET','CHANGELOG.md'),blk=clBlock(raw,v);
   if(!g)note=' (CHANGELOG.md bulunamadı, atlandı)';
   else{const cur=b64d(g.content);if(!blk||cur.indexOf('## '+v+' ')>=0)note=' (CHANGELOG zaten güncel)';else await ghF(c,'PUT','CHANGELOG.md',{message:v+': notlar',content:b64e(insCl(cur,blk)),branch:c.br,sha:g.sha})}
   if(safe){const vj=await ghF(c,'GET','version.json'),d0=(blk.match(/\((\d{4}-\d{2}-\d{2})\)/)||[])[1]||new Date().toISOString().slice(0,10),nn=blk.split('\n').filter(x=>x.indexOf('- ')==0).map(x=>x.slice(2)).slice(0,4),bd={message:v+': sürüm bilgisi',content:b64e(JSON.stringify({v:v,d:d0,n:nn,u:'https://github.com/'+c.repo+'/releases/latest'},null,1)+'\n'),branch:c.br};if(vj&&vj.sha)bd.sha=vj.sha;await ghF(c,'PUT','version.json',bd);note+=' (yeni sürüm uyarısı açıldı)'}
-  setGst('Gönderildi ✓ Actions derlemesi başladı.'+note);toast("GitHub'a gönderildi")
+  setGst('Gönderildi ✓ Actions derlemesi başladı.'+note);toast("GitHub'a gönderildi");render()
  }catch(e){const m=e==401?'Token geçersiz veya süresi dolmuş':e==403?'Yetki yok (Contents: Read and write?)':e==404?'Depo, dal veya www/app.html bulunamadı':(e==409||e==422)?'Çakışma, tekrar dene':'Hata: '+(e&&e.message||e);setGst(m,1);toast(m)}}
 function pickApp(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>installApp(String(r.result));r.readAsText(f);el.value=''}
 function installApp(t){
@@ -965,7 +981,7 @@ function pwTog(g,c){S.pw.sec[g]=c;save(true);render()}
 function pwLockNow(){UNL=false;render();toast('Kilitlendi')}
 function pwRemove(){if(!confirm('Şifre kaldırılsın mı? Tüm kilitler kalkar.'))return;S.pw={h:'',s:'',sec:{},hid:{}};UNL=false;save(true);render()}
 const pwFields=b=>`<input id="pw1" type="password" autocomplete="new-password" placeholder="Yeni şifre (en az 4 karakter)"><input id="pw2" type="password" autocomplete="new-password" placeholder="Şifreyi tekrar yaz" style="margin-top:6px"><button onclick="pwSet()" style="margin-top:8px">${b}</button>`;
-const SECT={s_snm:'Alt sekmeler',s_gor:'Görünüm',s_kur:'Kurlar (TL)',s_bil:'Bildirimler',s_gun:'Güncelleme günlüğü',s_kay:'Kurlar nereden geliyor?',s_gos:'Göstergeler',s_yed:'Yedekleme',s_upd:'Uygulama güncelleme',s_ver:'Veri',s_hak:'Hakkında'};
+const SECT={s_tdo:'Yapılacaklar',s_snm:'Alt sekmeler',s_gor:'Görünüm',s_kur:'Kurlar (TL)',s_bil:'Bildirimler',s_gun:'Güncelleme günlüğü',s_kay:'Kurlar nereden geliyor?',s_gos:'Göstergeler',s_yed:'Yedekleme',s_upd:'Uygulama güncelleme',s_ver:'Veri',s_hak:'Hakkında'};
 if(DEV_ALLOWED)Object.assign(SECT,{s_git:'GitHub bağlantısı',s_dev:'Geliştirmeyi bitir'});else delete SECT.s_upd;
 const anyLk=()=>!!(S.pw&&S.pw.h&&Object.values(S.pw.sec).some(Boolean));
 function pwFocus(){const e=$('pwi');if(e){e.scrollIntoView({block:'center'});e.focus()}}
@@ -999,6 +1015,6 @@ backup();render();
 if(UP.syt==tab&&UP.sy>0)setTimeout(()=>window.scrollTo(0,UP.sy),80);
 try{if(!DEV_ALLOWED)['app_html','app_prev',KDV,KGH,KGS].forEach(k=>localStorage.removeItem(k));else if(localStorage.getItem('app_html')&&!localStorage.getItem(KDV))localStorage.setItem(KDV,'1')}catch(e){}
 try{localStorage.setItem('app_new','0');localStorage.removeItem('app_try')}catch(e){}/*YT-OK*/
-schedNotif();refresh(true);setTimeout(()=>updCheck(),2500);
+schedNotif();refresh(true);setTimeout(()=>{try{const n=todoGet().filter(x=>!x.d).length;if(n)toast(n+' yapılacak madde var: Ayarlar → Yapılacaklar')}catch(e){}},4500);setTimeout(()=>updCheck(),2500);
 </script></body></html>
 
